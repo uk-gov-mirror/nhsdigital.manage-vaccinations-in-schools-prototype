@@ -11,6 +11,6 @@ export default [
     }
   },
   {
-    ignores: ['assets']
+    ignores: ['public']
   }
 ]

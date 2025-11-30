@@ -1,4 +1,16 @@
-{% extends "rig/default.njk" %}
+{% extends "prototype-kit-template.njk" %}
+
+{#- Decorated components -#}
+{%- from "x-nhsuk/decorated/button/macro.njk" import button with context %}
+{%- from "x-nhsuk/decorated/character-count/macro.njk" import characterCount with context %}
+{%- from "x-nhsuk/decorated/checkboxes/macro.njk" import checkboxes with context %}
+{%- from "x-nhsuk/decorated/date-input/macro.njk" import dateInput with context %}
+{%- from "x-nhsuk/decorated/file-upload/macro.njk" import fileUpload with context %}
+{%- from "x-nhsuk/decorated/input/macro.njk" import input with context %}
+{%- from "x-nhsuk/decorated/password-input/macro.njk" import passwordInput with context %}
+{%- from "x-nhsuk/decorated/radios/macro.njk" import radios with context %}
+{%- from "x-nhsuk/decorated/select/macro.njk" import select with context %}
+{%- from "x-nhsuk/decorated/textarea/macro.njk" import textarea with context %}
 
 {#- App macros -#}
 {% from "_macros/action-list.njk" import appActionList %}
@@ -20,8 +32,8 @@
   <meta name="format-detection" content="telephone=no">
 
   {% set assetsName = assetsName | default("application") %}
-  <link rel="stylesheet" href="/assets/{{ assetsName }}.css" media="all">
-  <script src="/assets/{{ assetsName }}.js" type="module"></script>
+  <link rel="stylesheet" href="/assets/stylesheets/{{ assetsName }}.css" media="all">
+  <script src="/assets/javascripts/{{ assetsName }}.js" type="module"></script>
 {% endblock %}
 
 {% block header %}
@@ -130,7 +142,7 @@
       }, {
         text: "Clear session data",
         href: "/clear-session-data"
-      } if useAutoStoreData, {
+      }, {
         text: "Design history",
         href: "https://design-history.prevention-services.nhs.uk/manage-vaccinations-in-schools/"
       }]
