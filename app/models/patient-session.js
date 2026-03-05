@@ -18,7 +18,14 @@ import {
   VaccinationOutcome,
   ProgrammeType
 } from '../enums.js'
-import { Gillick, Instruction, Patient, Programme, Session } from '../models.js'
+import {
+  AuditEvent,
+  Gillick,
+  Instruction,
+  Patient,
+  Programme,
+  Session
+} from '../models.js'
 import { getDateValueDifference, getYearGroup, today } from '../utils/date.js'
 import {
   getInstructionOutcome,
@@ -136,9 +143,11 @@ export class PatientSession {
    * @returns {Array<import('./audit-event.js').AuditEvent>} Audit events
    */
   get auditEvents() {
-    return this.patient.auditEvents.filter(({ programme_ids }) =>
-      programme_ids?.some((id) => this.session.programme_ids.includes(id))
-    )
+    return this.patient.events
+      .map((auditEvent) => new AuditEvent(auditEvent, this.context))
+      .filter(({ programme_ids }) =>
+        programme_ids?.some((id) => this.session.programme_ids.includes(id))
+      )
   }
 
   /**
