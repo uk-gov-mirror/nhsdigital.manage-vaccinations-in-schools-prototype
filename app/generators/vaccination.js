@@ -1,7 +1,7 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 
 import vaccines from '../datasets/vaccines.js'
-import { PatientStatus, VaccinationOutcome } from '../enums.js'
+import { VaccinationOutcome } from '../enums.js'
 import { Vaccination } from '../models.js'
 
 /**
@@ -20,17 +20,14 @@ export function generateVaccination(patientSession, programme, batch, users) {
   let injectionSite
   let sequence
 
-  let outcome
-  if (patientSession.report === PatientStatus.Due) {
-    outcome = faker.helpers.weightedArrayElement([
-      { value: VaccinationOutcome.Vaccinated, weight: 7 },
-      { value: VaccinationOutcome.PartVaccinated, weight: 1 },
-      { value: VaccinationOutcome.Absent, weight: 1 },
-      { value: VaccinationOutcome.DoNotVaccinate, weight: 1 },
-      { value: VaccinationOutcome.Refused, weight: 1 },
-      { value: VaccinationOutcome.Unwell, weight: 1 }
-    ])
-  }
+  const outcome = faker.helpers.weightedArrayElement([
+    { value: VaccinationOutcome.Vaccinated, weight: 7 },
+    { value: VaccinationOutcome.PartVaccinated, weight: 1 },
+    { value: VaccinationOutcome.Absent, weight: 1 },
+    { value: VaccinationOutcome.DoNotVaccinate, weight: 1 },
+    { value: VaccinationOutcome.Refused, weight: 1 },
+    { value: VaccinationOutcome.Unwell, weight: 1 }
+  ])
 
   if (programme.sequence) {
     sequence = programme.sequenceDefault
