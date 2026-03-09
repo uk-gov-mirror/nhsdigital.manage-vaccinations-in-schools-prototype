@@ -1217,8 +1217,7 @@ export const en = {
     },
     invite: {
       label: 'Send consent request',
-      success:
-        'Consent request sent to {{parent.formatted.fullNameAndRelationship}}'
+      success: 'Consent request sent to {{parent.fullNameAndRelationship}}'
     },
     replies: {
       pending: 'Consent requests',
@@ -1390,7 +1389,7 @@ export const en = {
       label: 'Parent',
       title: {
         new: 'Details for parent or guardian',
-        edit: 'Details for {{parent.formatted.fullNameAndRelationship}}'
+        edit: 'Details for {{parent.fullNameAndRelationship}}'
       },
       notify: {
         title:

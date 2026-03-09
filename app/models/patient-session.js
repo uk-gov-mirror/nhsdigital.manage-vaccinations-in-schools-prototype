@@ -213,7 +213,7 @@ export class PatientSession {
     return this.responses
       .filter((reply) => !reply.invalid)
       .filter((reply) => reply.declined)
-      .flatMap((reply) => reply.parent.formatted.fullNameAndRelationship)
+      .flatMap((reply) => reply.parent.fullNameAndRelationship)
   }
 
   /**

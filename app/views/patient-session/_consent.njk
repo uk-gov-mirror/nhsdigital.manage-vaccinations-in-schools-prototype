@@ -51,7 +51,7 @@
       {{ summaryList({
         card: {
           classes: "app-card--compact app-card--offset",
-          heading: reply.formatted.fullNameAndRelationship,
+          heading: reply.fullNameAndRelationship,
           headingLevel: 5,
           href: reply.uri if reply.delivered,
           clickable: true if reply.delivered
@@ -83,7 +83,7 @@
       {{ summaryList({
         card: {
           classes: "app-card--compact app-card--offset",
-          heading: parent.formatted.fullNameAndRelationship,
+          heading: parent.fullNameAndRelationship,
           headingLevel: 5
         },
         rows: summaryRows(parent, {

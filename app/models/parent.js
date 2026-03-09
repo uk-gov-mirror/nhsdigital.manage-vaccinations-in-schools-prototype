@@ -48,6 +48,15 @@ export class Parent {
   }
 
   /**
+   * Get full name and relationship to child
+   *
+   * @returns {string} Full name and relationship
+   */
+  get fullNameAndRelationship() {
+    return formatParent(this, false)
+  }
+
+  /**
    * Get formatted values
    *
    * @returns {object} Formatted values
@@ -57,7 +66,6 @@ export class Parent {
       contactPreference:
         this.contactPreferenceDetails || this.contactPreference,
       fullName: this.fullName || 'Name unknown',
-      fullNameAndRelationship: formatParent(this, false),
       relationship: formatOther(this.relationshipOther, this.relationship)
     }
   }
