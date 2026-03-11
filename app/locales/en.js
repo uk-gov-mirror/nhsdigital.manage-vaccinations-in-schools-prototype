@@ -1156,7 +1156,7 @@ export const en = {
       label: 'Notes'
     },
     ttcv: {
-      label: 'Previous vaccinations for Tetanus, Diptheria and Polio'
+      label: 'Previous vaccinations for tetanus, diptheria and polio'
     }
   },
   patientSession: {
