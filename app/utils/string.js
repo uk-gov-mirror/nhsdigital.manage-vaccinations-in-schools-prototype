@@ -335,7 +335,7 @@ export function formatParent(parent, includeContactDetails = true) {
 
   // Add relationship, if provided
   if (parent.fullName !== undefined && parent.relationship) {
-    string += ` (${parent.relationship})`
+    string += ` (${lowerCaseFirst(parent.relationship)})`
   }
 
   // Add telephone number, if provided
