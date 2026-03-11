@@ -162,6 +162,30 @@ export class Reply {
   }
 
   /**
+   * Get respondent’s relationship to child
+   *
+   * @returns {string|undefined} Relationship to child
+   */
+  get relationship() {
+    if (this.parent) {
+      return this.parent.relationship
+    } else if (this.child) {
+      return 'Child (Gillick competent)'
+    }
+  }
+
+  /**
+   * Get full name and relationship to child
+   *
+   * @returns {string} Full name and relationship
+   */
+  get fullNameAndRelationship() {
+    return this.selfConsent
+      ? this.relationship
+      : formatParent(this.parent, false)
+  }
+
+  /**
    * Was the consent response delivered?
    *
    * @returns {boolean} Response was delivered
@@ -179,19 +203,6 @@ export class Reply {
       this.parent?.tel && this.parent?.smsStatus === NotifySmsStatus.Delivered
 
     return hasEmailGotEmail || hasTelSmsGotSms
-  }
-
-  /**
-   * Get respondent’s relationship to child
-   *
-   * @returns {string|undefined} Relationship to child
-   */
-  get relationship() {
-    if (this.parent) {
-      return this.parent.relationship
-    } else if (this.child) {
-      return 'Child (Gillick competent)'
-    }
   }
 
   /**
@@ -399,9 +410,6 @@ export class Reply {
       }),
       createdBy: this.createdBy?.fullName || '',
       decisionStatus,
-      fullNameAndRelationship: this.selfConsent
-        ? this.relationship
-        : formatParent(this.parent, false),
       parent: formatParent(this.parent, true),
       tel: this.parent && this.parent.tel,
       email: this.parent && this.parent.email,
