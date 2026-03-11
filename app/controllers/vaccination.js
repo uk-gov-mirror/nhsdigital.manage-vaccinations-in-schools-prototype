@@ -196,8 +196,8 @@ export const vaccinationController = {
 
       // Update number of vaccinations given during session
       if (type === 'new' && vaccination.patientSession_uuid) {
-        if (data?.token?.vaccinations?.[vaccination.vaccine.snomed]) {
-          data.token.vaccinations[vaccination.vaccine.snomed] += 1
+        if (data?.token?.vaccinations?.[vaccination.vaccine_snomed]) {
+          data.token.vaccinations[vaccination.vaccine_snomed] += 1
         } else {
           data.token.vaccinations = {
             [vaccination.vaccine_snomed]: 1
