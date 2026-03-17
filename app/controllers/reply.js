@@ -79,7 +79,7 @@ export const replyController = {
       const { account, invalidUuid } = request.app.locals
       const { reply_uuid } = request.params
       const { data } = request.session
-      const { __, activity, patientSession, triage } = response.locals
+      const { __, patientSession, triage } = response.locals
 
       let reply
       let next
@@ -90,7 +90,7 @@ export const replyController = {
         Reply.update(reply_uuid, request.body.reply, data)
       } else {
         reply = new Reply(Reply.findOne(reply_uuid, data.wizard), data)
-        next = `${patientSession.uri}?activity=${activity || 'consent'}`
+        next = patientSession.uri
 
         // Remove any parent details in reply if self consent
         if (reply.selfConsent) {
@@ -402,7 +402,7 @@ export const replyController = {
     const { note } = request.body.reply
     const { reply_uuid } = request.params
     const { data } = request.session
-    const { __, activity, patientSession } = response.locals
+    const { __, patientSession } = response.locals
 
     // Clean up session data
     delete data.reply
@@ -412,7 +412,7 @@ export const replyController = {
 
     request.flash('success', __(`reply.invalidate.success`, { reply }))
 
-    response.redirect(`${patientSession.uri}?activity=${activity || 'consent'}`)
+    response.redirect(patientSession.uri)
   },
 
   withdraw(request, response) {
@@ -420,7 +420,7 @@ export const replyController = {
     const { refusalReason, refusalReasonOther, note } = request.body.reply
     const { reply_uuid } = request.params
     const { data } = request.session
-    const { __, activity, patientSession, reply } = response.locals
+    const { __, patientSession, reply } = response.locals
 
     // Create a new reply
     const newReply = Reply.create(
@@ -464,6 +464,6 @@ export const replyController = {
 
     request.flash('success', __(`reply.withdraw.success`, { reply }))
 
-    response.redirect(`${patientSession.uri}?activity=${activity || 'consent'}`)
+    response.redirect(patientSession.uri)
   }
 }

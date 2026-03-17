@@ -22,7 +22,6 @@ export const patientSessionController = {
   read(request, response, next, nhsn) {
     const { account } = request.app.locals
     const { programme_id, session_id } = request.params
-    const { activity } = request.query
     const { __ } = response.locals
 
     const patientSession = PatientSession.findAll(request.session.data)
@@ -127,27 +126,20 @@ export const patientSessionController = {
           icon: 'tick'
         }),
         text: patientSession.programme.name,
-        href: activity
-          ? `${patientSession.uri}?activity=${activity}`
-          : patientSession.uri,
+        href: patientSession.uri,
         current:
           view !== 'events' && patientSession.programme_id === programme_id
       })),
       ...[
         {
           text: __('patientSession.events.title'),
-          href: activity
-            ? `${patientSession.uri}/events?activity=${activity}`
-            : `${patientSession.uri}/events`,
+          href: `${patientSession.uri}/events`,
           current: view === 'events'
         }
       ]
     ]
 
-    response.locals.activity = activity
-    response.locals.referrer = activity
-      ? `${patientSession.uri}?activity=${activity}`
-      : patientSession.uri
+    response.locals.referrer = patientSession.uri
     response.locals.patientProgramme = patientProgramme
     response.locals.patientSession = patientSession
     response.locals.patient = patient
