@@ -11,6 +11,8 @@ export default {
       `${decision} by ${parent.fullNameAndRelationship}`,
     updated: ({ decision, parent }) =>
       `${decision} in updated response from ${parent.fullNameAndRelationship}`,
+    followedUp: ({ confirmed, decision, parent }) =>
+      `${confirmed ? 'Refusal confirmed' : decision} in followed-up response from ${parent.fullNameAndRelationship}`,
     matched: ({ parent }) =>
       `Consent response from ${parent.fullNameAndRelationship} manually matched with child record`,
     invalid: ({ parent }) =>
@@ -42,6 +44,8 @@ export default {
       `Confirmation of consent given (triage needed) sent to ${parent.fullNameAndRelationship}`,
     'consent-refused': (parent) =>
       `Confirmation of consent refused sent to ${parent.fullNameAndRelationship}`,
+    'consent-followed-up': (parent) =>
+      `Confirmation of follow-up decision to confirm refusal sent to ${parent.fullNameAndRelationship}`,
     'consent-unknown-contact': (parent) =>
       `Unknown parent contact details warning sent to ${parent.fullNameAndRelationship}`,
     'triage-delay-vaccination': (parent) =>

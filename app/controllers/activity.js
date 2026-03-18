@@ -1,5 +1,10 @@
 import activity from '../datasets/activity.js'
-import { ArchiveRecordReason, AuditEventType, ScreenOutcome } from '../enums.js'
+import {
+  ArchiveRecordReason,
+  AuditEventType,
+  ReplyDecision,
+  ScreenOutcome
+} from '../enums.js'
 import { generateParent } from '../generators/parent.js'
 import {
   AuditEvent,
@@ -40,6 +45,11 @@ export const activityController = {
     const reply = Reply.findAll(data).find(
       (reply) => !reply.selfConsent && reply.given
     )
+    const replyRefusal = {
+      ...reply,
+      decision: ReplyDecision.Refused,
+      confirmed: true
+    }
     const session = Session.findOne(Object.values(data.sessions)[0].id, data)
     const vaccinationGiven = Vaccination.findAll(data).find(
       (vaccination) => vaccination.given
@@ -81,6 +91,11 @@ export const activityController = {
           }),
           auditEvent({
             name: activity.consent.updated(reply),
+            createdBy_uid,
+            programme_ids: ['flu']
+          }),
+          auditEvent({
+            name: activity.consent.followedUp(replyRefusal),
             createdBy_uid,
             programme_ids: ['flu']
           }),
@@ -157,6 +172,7 @@ export const activityController = {
           'consent-given-changed-school',
           'consent-needs-triage',
           'consent-refused',
+          'consent-followed-up',
           'consent-unknown-contact',
           'triage-delay-vaccination',
           'triage-do-not-vaccinate',

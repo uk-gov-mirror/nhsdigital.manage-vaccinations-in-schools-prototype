@@ -804,6 +804,11 @@ export const en = {
         label: 'Consent refused',
         name: '{{session.vaccinationNames.titleCase}} on {{session.formatted.nextDate}} for {{consent.child.firstName}}'
       },
+      'consent-followed-up': {
+        // Reuses same confirmation as that for consent refused (or given)
+        label: 'Consent refusal confirmed',
+        name: '{{session.vaccinationNames.titleCase}} on {{session.formatted.nextDate}} for {{consent.child.firstName}}'
+      },
       'consent-needs-triage': {
         label: 'Consent needs triage',
         name: '{{session.vaccinationNames.titleCase}} on {{session.formatted.nextDate}} for {{consent.child.firstName}}'
@@ -2013,6 +2018,12 @@ export const en = {
       },
       'consent-refused': {
         label: 'Consent refused',
+        name: 'Confirmation that consent has been refused',
+        text: 'You’ve refused to give consent for {{child.fullName}} to have their {{session.vaccinationNames.sentenceCase}}.\n\nYou can give feedback about the ‘Give or refuse consent’ service by completing our short survey:\n\n<https://feedback.digital.nhs.uk/jfe/form/SV_3fICo6frMvUZX1k>\n\nYour feedback will help us improve the service.'
+      },
+      'consent-followed-up': {
+        // Reuses same confirmation as that for consent refused (or given)
+        label: 'Consent refusal confirmed',
         name: 'Confirmation that consent has been refused',
         text: 'You’ve refused to give consent for {{child.fullName}} to have their {{session.vaccinationNames.sentenceCase}}.\n\nYou can give feedback about the ‘Give or refuse consent’ service by completing our short survey:\n\n<https://feedback.digital.nhs.uk/jfe/form/SV_3fICo6frMvUZX1k>\n\nYour feedback will help us improve the service.'
       },
