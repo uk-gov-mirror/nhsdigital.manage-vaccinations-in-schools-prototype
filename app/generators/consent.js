@@ -130,7 +130,7 @@ export function generateConsent(
       ReplyDecision.OnlyMenACWY,
       ReplyDecision.OnlyTdIPV
     ].includes(decision) && { healthAnswers, triageNote }),
-    ...(decision === ReplyDecision.Refused && {
+    ...([ReplyDecision.Declined, ReplyDecision.Refused].includes(decision) && {
       refusalReason,
       ...(refusalReason === ReplyRefusal.AlreadyVaccinated && {
         refusalReasonDetails: 'My child had the vaccination at our GP surgery.'
@@ -142,6 +142,10 @@ export function generateConsent(
       ...(refusalReason === ReplyRefusal.Medical && {
         refusalReasonDetails:
           'My child has recently had chemotherapy and her immune system needs time to recover.'
+      }),
+      ...(refusalReason === ReplyRefusal.OutsideSchool && {
+        refusalReasonDetails:
+          'My child gets anxious in situations where there are a lot of people.'
       }),
       ...(refusalReason === ReplyRefusal.Other && {
         refusalReasonOther: 'My family rejects vaccinations on principle.'

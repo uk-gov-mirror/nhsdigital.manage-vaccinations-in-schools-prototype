@@ -324,10 +324,13 @@ export const getRefusalReason = (type, decision) => {
 
   // You cannot decline on the basis of already having had the vaccine
   if (decision === ReplyDecision.Declined) {
-    refusalReasons = refusalReasons.filter((value) =>
-      [ReplyRefusal.AlreadyVaccinated, ReplyRefusal.GettingElsewhere].includes(
-        value
-      )
+    refusalReasons = refusalReasons.filter(
+      (value) =>
+        ![
+          ReplyRefusal.AlreadyVaccinated,
+          ReplyRefusal.AlreadyVaccinatedMMR,
+          ReplyRefusal.GettingElsewhere
+        ].includes(value)
     )
   }
 

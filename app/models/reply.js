@@ -129,6 +129,7 @@ export class Reply {
 
     if (
       [
+        ReplyDecision.Declined,
         ReplyDecision.Refused,
         ReplyDecision.OnlyMenACWY,
         ReplyDecision.OnlyTdIPV
