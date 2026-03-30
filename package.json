@@ -43,6 +43,11 @@
     "stylelint-config-gds": "^2.0.0",
     "stylelint-order": "^7.0.1"
   },
+  "peerDependencies": {
+    "@x-govuk/govuk-prototype-filters": "^2.1.0",
+    "express": "^5.2.1",
+    "nhsuk-frontend": "^10.4.1"
+  },
   "engines": {
     "node": "^24"
   },
@@ -55,10 +60,5 @@
     ],
     "serviceName": "Manage vaccinations in schools",
     "templateExtension": "njk"
-  },
-  "peerDependencies": {
-    "@x-govuk/govuk-prototype-filters": "^2.1.0",
-    "express": "^5.2.1",
-    "nhsuk-frontend": "^10.4.1"
   }
 }
