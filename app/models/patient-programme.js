@@ -112,7 +112,7 @@ export class PatientProgramme {
    */
   get patientSessions() {
     return this.patient?.patientSessions.filter(
-      ({ programme_id }) => programme_id === this.programme_id
+      (patientSession) => patientSession?.programme_id === this.programme_id
     )
   }
 
