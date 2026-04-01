@@ -274,7 +274,7 @@ export const en = {
       otherMethods: {
         title: 'Other ways to book an appointment',
         description:
-          'The quickest way to book an appointment is online, using this service. This will take less than 5 minutes.\n\nIf you cannot use the service, you can book an appointment by phoning %s.'
+          'The quickest way to book an appointment is online, using this service. This will take less than 5 minutes per child.\n\nIf you cannot use the service, you can book an appointment by phoning %s.'
       }
     },
     childCount: {
@@ -2188,6 +2188,54 @@ export const en = {
     clinic: {
       label: 'Clinic',
       title: 'Where is this community clinic taking place?'
+    },
+    vaccinationPeriods: {
+      title: 'When will the session start and end?',
+      label: 'Vaccination period(s)',
+      period: {
+        title: 'Vaccination period %d',
+        startTime: {
+          label: 'Start time',
+          hint: 'For example, 13 00'
+        },
+        endTime: {
+          label: 'End time',
+          hint: 'For example, 17 00'
+        },
+        removePeriod: {
+          label: 'Remove'
+        }
+      },
+      addPeriod: {
+        description:
+          'Adding multiple vaccination periods will allow you to schedule breaks and to vary staffing levels across the session.',
+        label: 'Add another period'
+      }
+    },
+    vaccinators: {
+      title: 'How many vaccinators do you have for this session?',
+      label: 'Vaccinators',
+      input: {
+        allPeriodsLabel: 'All periods',
+        singlePeriodLabel:
+          '{{startTime.hour}}:{{startTime.minute}} to {{endTime.hour}}:{{endTime.minute}}',
+        suffix: 'vaccinators'
+      },
+      varies: {
+        label: 'The number will vary by vaccination period'
+      },
+      consistent: {
+        label: 'The number won’t vary'
+      }
+    },
+    appointmentLength: {
+      label: 'Appointment length',
+      title: 'How long are your appointments?',
+      hint: 'For example, 5 minutes for flu clinics or 10 minutes for injected vaccines',
+      suffix: 'minutes'
+    },
+    totalAppointments: {
+      label: 'Number of appointments'
     },
     location: {
       label: 'Location',

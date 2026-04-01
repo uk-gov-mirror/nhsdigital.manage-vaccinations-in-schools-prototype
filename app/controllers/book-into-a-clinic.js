@@ -6,25 +6,12 @@ import { ParentalRelationship, SessionPresets } from '../enums.js'
 import { ClinicAppointment, ClinicBooking } from '../models.js'
 import {
   getAllAppointmentPaths,
-  getHealthQuestionPaths
+  getHealthQuestionPaths,
+  getPreviousAddressItems
 } from '../utils/clinic-appointment.js'
 import { kebabToCamelCase } from '../utils/string.js'
 
-/**
- * @typedef {import('express').Request} Request
- * @typedef {import('express').Response} Response
- * @typedef {import('express').NextFunction} Next
- */
-
 export const bookIntoClinicController = {
-  /**
-   * Record the session preset
-   *
-   * @param {Request} request
-   * @param {Response} response
-   * @param {Next} next
-   * @param {string} session_preset_slug
-   */
   read(request, response, next, session_preset_slug) {
     const serviceName = 'Book into a clinic'
 
@@ -46,24 +33,12 @@ export const bookIntoClinicController = {
     next()
   },
 
-  /**
-   * Send to the start page
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
   redirect(request, response) {
     const { sessionPreset } = response.locals
 
     response.redirect(`${request.baseUrl}/${sessionPreset.slug}/start`)
   },
 
-  /**
-   * Start a new clinic booking for clinics with the primary programme we've been given
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
   new(request, response) {
     const { data } = request.session
     const { sessionPreset } = response.locals
@@ -81,16 +56,6 @@ export const bookIntoClinicController = {
     response.redirect(redirectUrl)
   },
 
-  /**
-   * Prepare a form-based page of the clinic booking journey.
-   *
-   * This includes code to set up radio button groups for various pages (we set them up
-   * regardless of which specific route we're handling).
-   *
-   * @param {Request} request
-   * @param {Response} response
-   * @param {Next} next
-   */
   readForm(request, response, next) {
     const { session_preset_slug, booking_uuid } = request.params
     const appointment_uuid = request.params.appointment_uuid
@@ -124,25 +89,24 @@ export const bookIntoClinicController = {
 
     // Create objects on the global context to allow us to check branching conditions, etc.
     // And make them available to the view.
-    let booking, appointment
+    let booking, appointments, currentAppointment
     if (booking_uuid) {
-      booking = new ClinicBooking(
-        ClinicBooking.findOne(booking_uuid, data?.wizard),
-        data
-      )
+      const wizardBooking = ClinicBooking.findOne(booking_uuid, data?.wizard)
+      appointments = wizardBooking.appointments
+      booking = new ClinicBooking(wizardBooking, data)
       response.locals.booking = booking
 
       if (appointment_uuid) {
-        appointment = new ClinicAppointment(
+        currentAppointment = new ClinicAppointment(
           ClinicAppointment.findOne(appointment_uuid, data?.wizard),
           data
         )
-        response.locals.appointment = appointment
+        response.locals.appointment = currentAppointment
         response.locals.childNumber =
-          booking.appointments_ids.indexOf(appointment.uuid) + 1
+          booking.appointments_ids.indexOf(currentAppointment.uuid) + 1
         response.locals.childCount = booking.appointments_ids.length
-        response.locals.firstName = appointment.firstName || 'your child'
-        response.locals.fullName = appointment.fullName || 'your child'
+        response.locals.firstName = currentAppointment.firstName || 'your child'
+        response.locals.fullName = currentAppointment.fullName || 'your child'
       }
     }
 
@@ -158,7 +122,12 @@ export const bookIntoClinicController = {
       [`/${session_preset_slug}/${booking_uuid}/new/child-count`]: {},
 
       // Appointment journey; once per child
-      ...getAllAppointmentPaths(request.session.data, booking),
+      ...getAllAppointmentPaths(
+        session_preset_slug,
+        booking_uuid,
+        request.session.data,
+        appointments
+      ),
 
       // Parent journey
       [`/${session_preset_slug}/${booking_uuid}/new/parent`]: {
@@ -208,15 +177,18 @@ export const bookIntoClinicController = {
     next()
   },
 
-  /**
-   * Render the requested form page
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
   showForm(request, response) {
     const { appointment } = response.locals
+    const { data } = request.session
     let { booking_uuid, view } = request.params
+
+    // Build the options for the selection of a home address address from those already entered
+    if (view === 'address-selection') {
+      const booking = ClinicBooking.findOne(booking_uuid, data.wizard)
+      response.locals.previousAddressItems = getPreviousAddressItems(
+        booking.appointments
+      )
+    }
 
     // All health questions use the same view
     let key
@@ -227,53 +199,12 @@ export const bookIntoClinicController = {
 
     // Only ask for details if question does not have sub-questions
     const hasSubQuestions =
-      appointment?.getHealthQuestionsForSelectedProgrammes(
-        request.session.data
-      )[key]?.conditional
-
-    // Build the options for the selection of a home address address from those already entered
-    if (view === 'address-selection') {
-      const booking = ClinicBooking.findOne(
-        booking_uuid,
-        request.session.data.wizard
-      )
-      const previousAddressItems = booking.appointments
-        .map((appointment) => {
-          if (appointment.child?.address) {
-            const oneLineAddress = Object.values(appointment.child.address)
-              .filter((string) => string)
-              .join(', ')
-            return {
-              text: oneLineAddress,
-              value: appointment.uuid
-            }
-          }
-
-          return null
-        })
-        .filter(Boolean)
-
-      response.locals.previousAddressItems = [
-        ...previousAddressItems,
-        {
-          divider: 'or'
-        },
-        {
-          text: 'Enter a different address',
-          value: 'new'
-        }
-      ]
-    }
+      appointment?.getHealthQuestionsForSelectedProgrammes(data)[key]
+        ?.conditional
 
     response.render(`book-into-a-clinic/form/${view}`, { key, hasSubQuestions })
   },
 
-  /**
-   * Store the latest values entered into a form in the booking journey
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
   updateForm(request, response) {
     const { booking_uuid, appointment_uuid, view } = request.params
     const { data } = request.session
@@ -326,11 +257,11 @@ export const bookIntoClinicController = {
       nextUrl = firstAppointmentUrl
     } else if (
       view === 'address-selection' &&
-      request.body.transaction.previousAddress !== 'new'
+      request.body.transaction.addressChoice !== 'new'
     ) {
       // We've just selected a previous child's address for the current appointment, so copy
       // that detail to the child record
-      const previous_appointment_uuid = request.body.transaction.previousAddress
+      const previous_appointment_uuid = request.body.transaction.addressChoice
       const previousAppointment = ClinicAppointment.findOne(
         previous_appointment_uuid,
         data.wizard
@@ -342,6 +273,11 @@ export const bookIntoClinicController = {
 
       if (previousAppointment && currentAppointment) {
         currentAppointment.child.address = previousAppointment.child.address
+        ClinicAppointment.update(
+          currentAppointment.uuid,
+          currentAppointment,
+          currentAppointment.context
+        )
       }
     }
 
@@ -351,12 +287,6 @@ export const bookIntoClinicController = {
     })
   },
 
-  /**
-   * Catch-all for pages not needing to reference a given clinic booking
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
   show(request, response) {
     const view = request.params.view || 'start'
 
