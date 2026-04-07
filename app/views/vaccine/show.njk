@@ -1,39 +1,37 @@
 {% extends "_layouts/default.njk" %}
 
-{% set title = vaccine.brandWithName %}
+{% set title = vaccine.brandWithType %}
 {% set paths = { back: "/vaccines" } %}
 
 {% block content %}
-  <div class="nhsuk-u-width-three-quarters">
-    {{ super() }}
+  {{ super() }}
 
-    {{ appHeading({
-      title: title
-    }) }}
+  {{ appHeading({
+    title: title
+  }) }}
 
-    {{ summaryList({
-      card: {
-        heading: vaccine.brand,
-        headingSize: "m",
-        actions: {
-          items: [
-            {
-              text: __("vaccine.show.delete"),
-              href: vaccine.uri + "/delete"
-            }
-          ]
-        }
-      },
-      rows: summaryRows(vaccine, {
-        manufacturer: {},
-        snomed: {},
-        type: {},
-        method: {},
-        dose: {},
-        healthQuestions: {},
-        preScreenQuestions: {},
-        sideEffects: {}
-      })
-    }) }}
-  </div>
+  {{ summaryList({
+    card: {
+      heading: __("vaccine.show.summary"),
+      headingSize: "m",
+      actions: {
+        items: [
+          {
+            text: __("vaccine.show.delete"),
+            href: vaccine.uri + "/delete"
+          }
+        ]
+      }
+    },
+    rows: summaryRows(vaccine, {
+      type: {},
+      brand: {},
+      manufacturer: {},
+      snomed: {},
+      method: {},
+      dose: {},
+      healthQuestions: {},
+      sideEffects: {}
+    })
+  }) }}
 {% endblock %}

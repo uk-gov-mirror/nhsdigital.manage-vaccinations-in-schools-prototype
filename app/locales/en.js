@@ -110,6 +110,7 @@ export const en = {
   batch: {
     new: {
       label: 'Add a new batch',
+      ariaLabel: 'Add a new %s batch',
       title: 'Add batch',
       confirm: 'Add batch',
       success: 'Batch {{batch.id}} added'
