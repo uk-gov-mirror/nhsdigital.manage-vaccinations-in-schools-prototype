@@ -1,7 +1,7 @@
 {% extends "_layouts/form.njk" %}
 
 {% set title = __("consent.decision.title", { session: session }) %}
-{% set programme_id = "mmr" if "MMR" in session.presetNames else null %}
+{% set programme_id = "mmr" if SessionPresetName.MMR in session.presetNames else null %}
 
 {% block form %}
   {% set programmeRadiosHtml = radios({

@@ -25,7 +25,7 @@
       {
         text: __n("consent.refusalReason.alreadyVaccinatedMMR"),
         value: ReplyRefusal.AlreadyVaccinatedMMR
-      } if "MMR" in session.presetNames else {
+      } if SessionPresetName.MMR in session.presetNames else {
         text: __n("consent.refusalReason.alreadyVaccinated", vaccinations),
         value: ReplyRefusal.AlreadyVaccinated
       },
@@ -38,10 +38,10 @@
       },
       {
         text: ReplyRefusal.Gelatine
-      } if vaccineIncludesGelatine and "Flu" in session.presetNames,
+      } if vaccineIncludesGelatine and SessionPresetName.Flu in session.presetNames,
       {
         text: ReplyRefusal.GelatineMMR
-      } if vaccineIncludesGelatine and "MMR" in session.presetNames,
+      } if vaccineIncludesGelatine and SessionPresetName.MMR in session.presetNames,
       {
         text: ReplyRefusal.Medical
       },
