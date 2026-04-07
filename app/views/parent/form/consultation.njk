@@ -2,6 +2,12 @@
 
 {% set title = __("consent.consultation.title") %}
 
+{% if consent.refusalReason in [ReplyRefusal.Gelatine, ReplyRefusal.GelatineMMR] %}
+  {% set hintText = __("consent.consultation.hintGelatine") %}
+{% elif consent.refusalReason not in [ReplyRefusal.Medical, ReplyRefusal.Personal] %}
+  {% set hintText = __("consent.consultation.hint") %}
+{% endif %}
+
 {% block form %}
   {{ radios({
     fieldset: {
@@ -13,8 +19,8 @@
       }
     },
     hint: {
-      text: __("consent.consultation.hint")
-    },
+      text: hintText
+    } if hintText,
     items: [{
       text: __("consent.consultation.yes"),
       value: true

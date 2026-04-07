@@ -828,6 +828,8 @@ export const en = {
       title:
         'Would you like a member of the team to contact you to discuss alternative options?',
       hint: 'For example, it may be possible to vaccinate your child in a community clinic.',
+      hintGelatine:
+        'For example, it may be possible to vaccinate your child with a gelatine-free vaccine.',
       label: 'Discuss options',
       yes: 'Yes, I would like someone to contact me',
       no: 'No'
