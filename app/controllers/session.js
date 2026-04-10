@@ -15,7 +15,6 @@ import {
 } from '../enums.js'
 import {
   Clinic,
-  ClinicVaccinationPeriod,
   DefaultBatch,
   Instruction,
   PatientSession,
@@ -496,25 +495,14 @@ export const sessionController = {
     // Copy the saved session to the wizard context, if not already there
     let session = Session.findOne(session_id, data.wizard)
     if (!session) {
-      // NB: response.locals.session was set in read()
+      // NB: response.locals.session was read from the global context in read()
       session = Session.create(response.locals.session, data.wizard)
-      if (session.type === SessionType.Clinic) {
-        response.locals.session.vaccinationPeriods.forEach(
-          (vaccinationPeriod) => {
-            ClinicVaccinationPeriod.create(vaccinationPeriod, data.wizard)
-          }
-        )
-      }
     }
 
     // Set up the transaction metadata that controls how some clinic values are entered
     if (session.type === SessionType.Clinic) {
       const vaccinatorCounts = new Set(
-        session.vaccination_period_ids.map(
-          (period_id) =>
-            ClinicVaccinationPeriod.findOne(period_id, data.wizard)
-              ?.vaccinatorCount
-        )
+        session.vaccinationPeriods.map((period) => period.vaccinatorCount)
       )
       const variableVaccinatorCounts = vaccinatorCounts.size > 1
       data.transaction = {
@@ -533,9 +521,7 @@ export const sessionController = {
 
     if (session.type === SessionType.Clinic) {
       response.locals.vaccinationPeriodsSummary = getVaccinationPeriodsSummary(
-        session.vaccination_period_ids.map((period_id) =>
-          ClinicVaccinationPeriod.findOne(period_id, data.wizard)
-        ),
+        session.vaccinationPeriods,
         session.appointmentLength
       )
     }
@@ -558,17 +544,6 @@ export const sessionController = {
         data.wizard.sessions[session_id],
         data
       )
-
-      // Update any clinic vaccination periods
-      if (session.type === SessionType.Clinic) {
-        session.vaccination_period_ids.forEach((period_id) => {
-          const vaccinationPeriod = ClinicVaccinationPeriod.findOne(
-            period_id,
-            data.wizard
-          )
-          ClinicVaccinationPeriod.update(period_id, vaccinationPeriod, data)
-        })
-      }
 
       // Clean up session data
       delete data.vaccinationPeriods
@@ -596,13 +571,6 @@ export const sessionController = {
         session = Session.create(response.locals.session, data.wizard)
       }
       response.locals.session = new Session(session, data)
-
-      const vaccinationPeriods = session.vaccinationPeriods
-      if (vaccinationPeriods) {
-        response.locals.vaccinationPeriods = vaccinationPeriods.map(
-          (period) => new ClinicVaccinationPeriod(period, data)
-        )
-      }
 
       const journey = {
         [`/`]: {},
@@ -670,10 +638,10 @@ export const sessionController = {
         }
 
         // Generate summary info for the check-answers page
-        if (vaccinationPeriods) {
+        if (session.vaccinationPeriods) {
           response.locals.vaccinationPeriodsSummary =
             getVaccinationPeriodsSummary(
-              vaccinationPeriods,
+              session.vaccinationPeriods,
               session.appointmentLength
             )
         }
@@ -731,95 +699,72 @@ export const sessionController = {
 
     if (session.type === SessionType.Clinic) {
       // Add the first vaccination period, if not already there
-      if (!session.vaccination_period_ids?.length) {
-        const vaccination_period_ids = [
-          ClinicVaccinationPeriod.create(
-            { session_id: session.id },
-            data.wizard
-          ).uuid
-        ]
-        Session.update(session_id, { vaccination_period_ids }, data.wizard)
+      if (!session.vaccinationPeriods?.length) {
+        session.addVaccinationPeriod()
+        Session.update(session_id, session, data.wizard)
       }
 
       // Act accordingly for each of the possible button clicks in the vaccination periods page
       if (view === 'vaccination-periods') {
         // Save the times entered, no matter what we're doing next
-        for (const [period_id, vaccinationPeriod] of Object.entries(
+        for (let [period_uuid, vaccinationPeriodValues] of Object.entries(
           request.body.vaccinationPeriods
         )) {
+          // Make sure the period start and end have date information as well as time
           const sessionDate_ = session.date
             ? session.date_
             : convertIsoDateToObject(today())
-          ClinicVaccinationPeriod.update(
-            period_id,
-            _.merge(
-              // make sure the period start and end have date information as well as time
-              { startAt_: { ...sessionDate_ }, endAt_: { ...sessionDate_ } },
-              vaccinationPeriod
-            ),
-            data.wizard
-          )
+          const dateValues = {
+            startAt_: { ...sessionDate_ },
+            endAt_: { ...sessionDate_ }
+          }
+          vaccinationPeriodValues = _.merge(dateValues, vaccinationPeriodValues)
+
+          const vaccinationPeriod = session.getVaccinationPeriod(period_uuid)
+          vaccinationPeriod.startAt_ = vaccinationPeriodValues.startAt_
+          vaccinationPeriod.endAt_ = vaccinationPeriodValues.endAt_
+
+          Session.update(session_id, session, data.wizard)
         }
 
         // Add or remove vaccination periods, if requested
         const action = request.body.action
         if (action === 'add-period') {
-          // Add another vaccination period
-          const vaccination_period_ids = [
-            ...session.vaccination_period_ids,
-            ClinicVaccinationPeriod.create(
-              { session_id: session.id },
-              data.wizard
-            ).uuid
-          ]
-          Session.update(session_id, { vaccination_period_ids }, data.wizard)
+          session.addVaccinationPeriod()
+          Session.update(session_id, session, data.wizard)
 
           nextPage = request.originalUrl
         } else if (action.startsWith('remove-period-')) {
           // Remove a vaccination period
-          const periodIndex = parseInt(
-            action.substring('remove-period-'.length),
-            10
-          )
-          const period_id = session.vaccination_period_ids[periodIndex]
-          const vaccination_period_ids =
-            session.vaccination_period_ids.toSpliced(periodIndex, 1)
-          Session.update(session_id, { vaccination_period_ids }, data.wizard)
-
-          ClinicVaccinationPeriod.delete(period_id, data.wizard)
+          const index = parseInt(action.substring('remove-period-'.length))
+          const period_id = session.vaccinationPeriods[index].uuid
+          session.removeVaccinationPeriod(period_id)
+          Session.update(session_id, session, data.wizard)
 
           nextPage = request.originalUrl
         }
       } else if (view === 'vaccinators') {
         if (
-          session.vaccination_period_ids.length > 1 &&
+          session?.vaccinationPeriods.length > 1 &&
           request.body.transaction.hasVariableVaccinatorCounts === 'false'
         ) {
           // Set the same number of vaccinators in all vaccination periods
-          for (const period_id of session.vaccination_period_ids) {
-            ClinicVaccinationPeriod.update(
-              period_id,
-              {
-                vaccinatorCount: parseInt(
-                  request.body.transaction.consistentVaccinatorCount,
-                  10
-                )
-              },
-              data.wizard
-            )
+          const vaccinatorCount = parseInt(
+            request.body.transaction.consistentVaccinatorCount
+          )
+          for (const period of session.vaccinationPeriods) {
+            period.vaccinatorCount = vaccinatorCount
           }
         } else {
           // Each vaccination period gets its own number of vaccinators
-          for (const [period_id, vaccinationPeriod] of Object.entries(
+          for (const [period_uuid, vaccinationPeriodValues] of Object.entries(
             request.body.vaccinationPeriods
           )) {
-            ClinicVaccinationPeriod.update(
-              period_id,
-              vaccinationPeriod,
-              data.wizard
-            )
+            session.getVaccinationPeriod(period_uuid).vaccinatorCount =
+              vaccinationPeriodValues.vaccinatorCount
           }
         }
+        Session.update(session_id, session, data.wizard)
       }
     }
 

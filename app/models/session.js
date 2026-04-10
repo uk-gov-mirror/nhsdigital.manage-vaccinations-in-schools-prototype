@@ -65,7 +65,7 @@ import {
  *
  *   Clinics only
  * @property {string} [clinic_id] - Clinic ID i.e. the venue
- * @property {Array<string>} [vaccination_period_ids] - the vaccination periods (start, end, etc) being run in the clinic
+ * @property {Array<ClinicVaccinationPeriod>} vaccinationPeriods - vaccination periods and staffing in this clinic
  * @property {number} [appointmentLength] - standard length of the clinic appointment, in minutes
  *
  *   Schools only
@@ -94,7 +94,11 @@ export class Session {
     if (this.type === SessionType.Clinic) {
       this.clinic_id = options?.clinic_id
       this.registration = false
-      this.vaccination_period_ids = options?.vaccination_period_ids || []
+      this.vaccinationPeriods = options?.vaccinationPeriods
+        ? options.vaccinationPeriods.map(
+            (period) => new ClinicVaccinationPeriod(period)
+          )
+        : []
       this.appointmentLength = options?.appointmentLength
     }
 
@@ -344,20 +348,63 @@ export class Session {
   }
 
   /**
-   * Get the vaccination periods set up for this clinic
+   * Get the vaccination period with the given UUID in this clinic session
    *
-   * @returns {Array<ClinicVaccinationPeriod>|undefined} - the vaccination periods in this clinic session
+   * @param {string} period_uuid - the unique ID of the vaccination period to return
+   * @returns {ClinicVaccinationPeriod} - the vaccination period matching the given UUID
    */
-  get vaccinationPeriods() {
-    if (this.clinic_id && this.vaccination_period_ids) {
-      try {
-        return this.vaccination_period_ids.map((period_id) =>
-          ClinicVaccinationPeriod.findOne(period_id, this.context)
-        )
-      } catch (error) {
-        console.error('Session.vaccinationPeriods', error.message)
-      }
+  getVaccinationPeriod(period_uuid) {
+    if (this.type !== SessionType.Clinic) {
+      throw new Error('Session must be a clinic to get vaccination periods')
     }
+
+    return this.vaccinationPeriods?.find(
+      (period) => period.uuid === period_uuid
+    )
+  }
+
+  /**
+   * Add a new vaccination period to this clinic session
+   *
+   * @param {object} options - any specific values to give the new period
+   * @returns {ClinicVaccinationPeriod} - the new vaccination period
+   */
+  addVaccinationPeriod(options) {
+    if (this.type !== SessionType.Clinic) {
+      throw new Error('Session must be a clinic to add vaccination periods')
+    }
+
+    this.vaccinationPeriods = this.vaccinationPeriods || []
+    this.vaccinationPeriods.push(new ClinicVaccinationPeriod(options || {}))
+
+    const newPeriod = this.vaccinationPeriods.at(-1)
+    if (this.vaccinationPeriods.length >= 2) {
+      newPeriod.vaccinatorCount = this.vaccinationPeriods.at(-2).vaccinatorCount
+    }
+
+    return newPeriod
+  }
+
+  /**
+   * Remove a vaccination period from this clinic session
+   *
+   * @param {string} period_uuid - the unique ID of the vaccination period to remove
+   */
+  removeVaccinationPeriod(period_uuid) {
+    if (this.type !== SessionType.Clinic) {
+      throw new Error('Session must be a clinic to remove vaccination periods')
+    }
+
+    const index = this.vaccinationPeriods.findIndex(
+      (period) => period.uuid == period_uuid
+    )
+    if (index === -1) {
+      throw new Error(
+        `Unable to find vaccination period with uuid of ${period_uuid}`
+      )
+    }
+
+    this.vaccinationPeriods.splice(index, 1)
   }
 
   /**
