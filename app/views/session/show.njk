@@ -20,7 +20,7 @@
     {% include "session/_session-vaccinated-summary.njk" %}
   {% endif %}
 
-  {% if not session.isUnplanned %}
+  {% if not session.isUnplanned and not session.isCompleted %}
     {% include "session/_session-activity-summary.njk" %}
   {% endif %}
 
