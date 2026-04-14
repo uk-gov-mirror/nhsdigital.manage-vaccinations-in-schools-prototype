@@ -260,13 +260,13 @@ export const en = {
           'Book an appointment for the MenACWY and Td/IPV vaccinations',
         [SessionPresetName.HPV]: 'Book an appointment for the HPV vaccination',
         [SessionPresetName.MMR]:
-          'Book an appointment for an MMR or MMR(V) catch-up vaccination'
+          'Book an appointment for an MMR or MMRV catch-up vaccination'
       },
       primaryProgrammeInSentence: {
         [SessionPresetName.Flu]: 'flu',
         [SessionPresetName.Doubles]: 'MenACWY and Td/IPV',
         [SessionPresetName.HPV]: 'HPV',
-        [SessionPresetName.MMR]: 'MMR or MMR(V)'
+        [SessionPresetName.MMR]: 'MMR and MMRV'
       },
       confirm: {
         title: 'Book an appointment',
@@ -650,6 +650,9 @@ export const en = {
         },
         other: {
           label: 'Other'
+        },
+        none: {
+          label: 'No, my child does not need any adjustments'
         }
       },
       adjustmentsOther: {
@@ -676,6 +679,9 @@ export const en = {
         },
         communicative: {
           hint: 'For example, related to autism or ADHD (attention deficit hyperactivity disorder)'
+        },
+        none: {
+          label: 'No, my child has no impairments'
         }
       },
       impairmentsOther: {
