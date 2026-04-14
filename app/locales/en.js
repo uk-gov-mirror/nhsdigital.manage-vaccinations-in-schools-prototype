@@ -989,7 +989,9 @@ export const en = {
     list: {
       label: 'Downloads',
       title: 'Downloads',
-      results: 'All downloads'
+      results: 'All downloads',
+      introduction:
+        'Use this page to see the status of downloads you’ve requested elsewhere in Mavis.\n\nDownload times can vary. Refresh the page to see the latest status.'
     },
     search: {
       label: 'Find download'
@@ -1185,7 +1187,8 @@ export const en = {
     list: {
       label: 'Manage data',
       title: 'Manage data',
-      description: 'Import and export child and vaccination records'
+      description:
+        'Upload records to Mavis and keep track of requested downloads'
     }
   },
   notice: {

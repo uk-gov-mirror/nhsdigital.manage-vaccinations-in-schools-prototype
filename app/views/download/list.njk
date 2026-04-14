@@ -13,6 +13,10 @@
     view: "downloads"
   }) }}
 
+  <div class="nhsuk-u-reading-width">
+    {{ __("download.list.introduction") | nhsukMarkdown }}
+  </div>
+
   <div class="nhsuk-grid-row">
     <app-auto-submit class="app-grid-column-filters">
       {% call card({
