@@ -1462,6 +1462,10 @@ export const en = {
       count:
         '{count, plural, =0 {No vaccination record} one {Vaccination record} other {# vaccination records}}'
     },
+    procedures: {
+      count:
+        '{count, plural, =0 {No procedures recorded} one {Procedure} other {# procedures}}'
+    },
     status: {
       label: 'Status'
     },

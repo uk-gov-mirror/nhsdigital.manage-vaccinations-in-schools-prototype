@@ -27,16 +27,16 @@
   }) }}
 
   {% call card({
-    heading: __mf("patientProgramme.vaccinationsGiven.count", {
-      count: patientProgramme.vaccinationsGiven.length
+    heading: __mf("patientProgramme.procedures.count", {
+      count: patientProgramme.vaccinationOutcomes.length
     }),
     headingLevel: 3
   }) %}
     {{ patientProgramme.formatted.statusWithNotes | nhsukMarkdown }}
 
-    {% if patientProgramme.vaccinationsGiven.length %}
+    {% if patientProgramme.vaccinationOutcomes.length %}
       {% set vaccinationRows = [] %}
-      {% for vaccination in patientProgramme.vaccinationsGiven %}
+      {% for vaccination in patientProgramme.vaccinationOutcomes %}
         {% set vaccinationRows = vaccinationRows | push([
           {
             header: __("vaccination.createdAt.label"),
@@ -58,7 +58,7 @@
       {% endfor %}
 
       {{ table({
-        id: "vaccinations",
+        id: "procedures",
         responsive: true,
         head: [
           { text: __("vaccination.createdAt.label") },
