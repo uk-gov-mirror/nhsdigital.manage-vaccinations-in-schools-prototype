@@ -11,6 +11,7 @@ import {
   getCurrentAcademicYear,
   getDateValueDifference
 } from '../utils/date.js'
+import { getScheduleSummary } from '../utils/dose-schedule.js'
 import { ordinal } from '../utils/number.js'
 import { getReportOutcome } from '../utils/patient-session.js'
 import { getPatientStatus } from '../utils/status.js'
@@ -239,6 +240,33 @@ export class PatientProgramme {
     }
 
     return this.dosesNeeded
+  }
+
+  /**
+   * Get schedule summary classifying given doses into valid and ignored
+   * according to programme rules, with the next eligibility date if a slot
+   * is still empty. MMR only in phase 1; other programmes fall through with
+   * all given doses treated as valid.
+   *
+   * @returns {{
+   *   validDoses: Array<{ vaccination: Vaccination, sequence: number }>,
+   *   ignoredDoses: Array<{ vaccination: Vaccination, reason: string }>,
+   *   nextEligibleFrom: Date|null,
+   *   dosesComplete: number,
+   *   dosesNeeded: number
+   * }}
+   */
+  get scheduleSummary() {
+    const summary = getScheduleSummary({
+      vaccinationsGiven: this.vaccinationsGiven || [],
+      dob: this.patient?.dob,
+      programme: this.programme
+    })
+    return {
+      ...summary,
+      dosesComplete: summary.validDoses.length,
+      dosesNeeded: this.dosesNeeded
+    }
   }
 
   /**
