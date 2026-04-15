@@ -1472,6 +1472,9 @@ export const en = {
       dose: {
         label: 'Dose',
         number: 'Dose {sequence}'
+      },
+      ignored: {
+        label: 'Ignored'
       }
     },
     status: {
