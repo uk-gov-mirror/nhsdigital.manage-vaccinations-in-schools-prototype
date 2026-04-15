@@ -1468,7 +1468,11 @@ export const en = {
     },
     vaccinationRecord: {
       label: 'Vaccination record',
-      dosesComplete: '{complete} of {needed} doses complete.'
+      dosesComplete: '{complete} of {needed} doses complete.',
+      dose: {
+        label: 'Dose',
+        number: 'Dose {sequence}'
+      }
     },
     status: {
       label: 'Status'

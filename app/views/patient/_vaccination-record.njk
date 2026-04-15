@@ -10,4 +10,46 @@
       needed: summary.dosesNeeded
     }) }}
   </p>
+
+  {% set rows = [] %}
+
+  {% for valid in summary.validDoses %}
+    {% set rows = rows | push([
+      {
+        header: __("patientProgramme.vaccinationRecord.dose.label"),
+        text: __mf("patientProgramme.vaccinationRecord.dose.number", {
+          sequence: valid.sequence
+        })
+      },
+      {
+        header: __("vaccination.createdAt.label"),
+        text: valid.vaccination.formatted.createdAt_date
+      }
+    ]) %}
+  {% endfor %}
+
+  {% for sequence in range(summary.validDoses.length + 1, summary.dosesNeeded + 1) %}
+    {% set rows = rows | push([
+      {
+        header: __("patientProgramme.vaccinationRecord.dose.label"),
+        text: __mf("patientProgramme.vaccinationRecord.dose.number", {
+          sequence: sequence
+        })
+      },
+      {
+        header: __("vaccination.createdAt.label"),
+        text: "—"
+      }
+    ]) %}
+  {% endfor %}
+
+  {{ table({
+    id: "vaccination-record",
+    responsive: true,
+    head: [
+      { text: __("patientProgramme.vaccinationRecord.dose.label") },
+      { text: __("vaccination.createdAt.label") }
+    ],
+    rows: rows
+  }) if rows.length }}
 {% endcall %}
