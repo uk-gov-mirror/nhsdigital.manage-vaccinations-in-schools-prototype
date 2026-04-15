@@ -1,0 +1,13 @@
+{% set summary = patientProgramme.scheduleSummary %}
+
+{% call card({
+  heading: __("patientProgramme.vaccinationRecord.label"),
+  headingLevel: 3
+}) %}
+  <p class="nhsuk-body">
+    {{ __mf("patientProgramme.vaccinationRecord.dosesComplete", {
+      complete: summary.dosesComplete,
+      needed: summary.dosesNeeded
+    }) }}
+  </p>
+{% endcall %}

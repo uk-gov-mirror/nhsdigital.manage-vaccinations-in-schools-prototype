@@ -26,6 +26,8 @@
     patient: patient
   }) }}
 
+  {% include "patient/_vaccination-record.njk" %}
+
   {% call card({
     heading: __mf("patientProgramme.procedures.count", {
       count: patientProgramme.vaccinationOutcomes.length
