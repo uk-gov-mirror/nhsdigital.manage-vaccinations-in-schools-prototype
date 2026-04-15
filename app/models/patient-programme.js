@@ -8,6 +8,7 @@ import {
 } from '../enums.js'
 import { AuditEvent, Patient, Programme, Vaccination } from '../models.js'
 import {
+  formatDate,
   getCurrentAcademicYear,
   getDateValueDifference
 } from '../utils/date.js'
@@ -265,7 +266,10 @@ export class PatientProgramme {
     return {
       ...summary,
       dosesComplete: summary.validDoses.length,
-      dosesNeeded: this.dosesNeeded
+      dosesNeeded: this.dosesNeeded,
+      nextEligibleFromFormatted: summary.nextEligibleFrom
+        ? formatDate(summary.nextEligibleFrom, { dateStyle: 'long' })
+        : null
     }
   }
 

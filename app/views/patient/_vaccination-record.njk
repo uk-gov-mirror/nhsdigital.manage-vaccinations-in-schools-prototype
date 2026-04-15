@@ -51,7 +51,15 @@
     ]) %}
   {% endfor %}
 
-  {% for sequence in range(summary.validDoses.length + 1, summary.dosesNeeded + 1) %}
+  {% set firstEmptySequence = summary.validDoses.length + 1 %}
+  {% for sequence in range(firstEmptySequence, summary.dosesNeeded + 1) %}
+    {% set isFirstEmpty = sequence == firstEmptySequence %}
+    {% set dateText = "—" %}
+    {% if isFirstEmpty and summary.nextEligibleFromFormatted %}
+      {% set dateText = __mf("patientProgramme.vaccinationRecord.eligibleFrom", {
+        date: summary.nextEligibleFromFormatted
+      }) %}
+    {% endif %}
     {% set rows = rows | push([
       {
         header: __("patientProgramme.vaccinationRecord.dose.label"),
@@ -61,7 +69,7 @@
       },
       {
         header: __("vaccination.createdAt.label"),
-        text: "—"
+        text: dateText
       }
     ]) %}
   {% endfor %}

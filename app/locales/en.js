@@ -1475,7 +1475,8 @@ export const en = {
       },
       ignored: {
         label: 'Ignored'
-      }
+      },
+      eligibleFrom: 'Eligible from {date}'
     },
     status: {
       label: 'Status'
