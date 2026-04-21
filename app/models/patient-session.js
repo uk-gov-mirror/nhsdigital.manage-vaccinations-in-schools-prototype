@@ -493,6 +493,8 @@ export class PatientSession {
         return PatientConsentStatus.NoResponse
       case ConsentOutcome.Declined:
         return PatientConsentStatus.FollowUp
+      case ConsentOutcome.Refused:
+        return PatientRefusedStatus.Refusal
     }
   }
 
