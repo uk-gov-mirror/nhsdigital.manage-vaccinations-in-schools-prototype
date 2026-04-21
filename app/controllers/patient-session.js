@@ -285,13 +285,10 @@ export const patientSessionController = {
   },
 
   invite(request, response) {
-    const { account } = request.app.locals
     const { __, back, patient, patientSession } = response.locals
 
-    patient.requestConsent({
-      patientSession,
-      createdBy_uid: account.uid
-    })
+    patient.addToSession(patientSession)
+    patient.requestConsent(patientSession)
 
     request.flash(
       'success',

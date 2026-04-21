@@ -458,6 +458,10 @@ export const patientController = {
       data
     )
 
+    patient.addToSession(createdPatientSession)
+
+    Patient.update(patient.uuid, { clinicProgramme_ids: [programme_id] }, data)
+
     const patientSession = PatientSession.findOne(
       createdPatientSession.uuid,
       data

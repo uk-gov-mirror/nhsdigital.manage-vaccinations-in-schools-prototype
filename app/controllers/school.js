@@ -473,23 +473,20 @@ export const schoolController = {
     const school = School.findOne(school_id, data)
 
     // Find patients to invite to clinic
-    const patientSessionsForClinic = school.patients.map(
-      (patient) => patient.uuid
-    )
+    const patient_uuids = school.patients.map((patient) => patient.uuid)
 
     // Invite parents to book into a clinic
-    for (const patient of school.patients) {
-      const clinicProgramme_ids = request.body.clinicProgramme_ids.filter(
-        (item) => item !== '_unchecked'
-      )
-
-      Patient.update(patient.uuid, { clinicProgramme_ids }, data)
+    const clinicProgramme_ids = request.body.clinicProgramme_ids.filter(
+      (item) => item !== '_unchecked'
+    )
+    for (const patient_uuid of patient_uuids) {
+      Patient.update(patient_uuid, { clinicProgramme_ids }, data)
     }
 
     request.flash(
       'success',
       __mf(`school.inviteToClinic.success`, {
-        count: patientSessionsForClinic.length
+        count: patient_uuids.length
       })
     )
 

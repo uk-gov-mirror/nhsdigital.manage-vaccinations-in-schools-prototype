@@ -642,9 +642,12 @@ export class Patient extends Child {
   /**
    * Add patient to session
    *
-   * @param {import('./session.js').Session} session - Session
+   * @param {import('./patient-session.js').PatientSession} patientSession - PatientSession
    */
-  addToSession(session) {
+  addToSession(patientSession) {
+    this.patientSession_uuids.push(patientSession.uuid)
+
+    const session = patientSession.session
     this.addEvent({
       name: activity.session.added(session),
       createdAt: session.openAt,
@@ -678,8 +681,6 @@ export class Patient extends Child {
    * @param {import('./patient-session.js').PatientSession} patientSession - Patient session
    */
   requestConsent(patientSession) {
-    this.patientSession_uuids.push(patientSession.uuid)
-
     for (const parent of this.parents) {
       if (parent.email && parent.emailStatus === NotifyEmailStatus.Delivered) {
         this.addEvent({
