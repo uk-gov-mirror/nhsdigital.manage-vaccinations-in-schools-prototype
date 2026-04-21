@@ -64,19 +64,16 @@
       decorate: "programme_id"
     }) if programmeItems }}
 
-    {{ checkboxes({
+    {{ radios({
       fieldset: {
         legend: {
           classes: "nhsuk-fieldset__legend--s",
-          text: __("patient.clinicProgramme_ids.label")
+          text: "Clinic status"
         }
       },
       small: true,
-      items: [{
-        text: 'Invited to clinic',
-        value: 'true'
-      }],
-      decorate: "invitedToClinic"
+      items: radioFilterItems(PatientClinicStatus, data["clinicStatus"]),
+      decorate: "clinicStatus"
     }) }}
 
     {% for name, enums in params.checkboxFilters %}

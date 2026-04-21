@@ -294,6 +294,7 @@ export const sessionController = {
       instruct: request.query.instruct || 'none',
       register: request.query.register || 'none',
       report: request.query.report || 'none',
+      clinicStatus: request.query.clinicStatus || 'none',
       patientConsent: request.query.patientConsent || 'none',
       patientDeferred: request.query.patientDeferred || 'none',
       patientRefused: request.query.patientRefused || 'none',
@@ -453,7 +454,7 @@ export const sessionController = {
     const params = new URLSearchParams()
 
     // Radios
-    for (const key of ['q', 'instruct', 'register', 'report']) {
+    for (const key of ['q', 'clinicStatus', 'instruct', 'register', 'report']) {
       const value = request.body[key]
       if (value) {
         params.append(key, String(value))

@@ -65,8 +65,7 @@ export const patientController = {
   },
 
   readAll(request, response, next) {
-    const { invitedToClinic, option, programme_id, q, yearGroup } =
-      request.query
+    const { option, programme_id, q, yearGroup } = request.query
     const { data } = request.session
 
     const programmes = Programme.findAll(data)
@@ -103,6 +102,7 @@ export const patientController = {
     // Filter defaults
     const filters = {
       report: request.query.report || 'none',
+      clinicStatus: request.query.clinicStatus || 'none',
       patientConsent: request.query.patientConsent || 'none',
       patientDeferred: request.query.patientDeferred || 'none',
       patientRefused: request.query.patientRefused || 'none',
@@ -120,17 +120,25 @@ export const patientController = {
       )
     }
 
-    // Filter by programme clinic invitations
-    if (programme_id && invitedToClinic === 'true') {
-      results = results.filter(
-        (patient) => patient.programmes[programme_id]?.invitedToClinic
-      )
-    } else if (invitedToClinic === 'true') {
-      results = results.filter((patient) =>
-        Object.values(patient.programmes).some(
-          (programme) => programme.invitedToClinic
+    // Filter by programme clinic status
+    if (filters.clinicStatus && filters.clinicStatus !== 'none') {
+      if (programme_id) {
+        // Patient must have the selected clinic status for any of the selected programmes (if
+        // there's a selected programme), or for *any* programme if not
+        results = results.filter((patient) =>
+          programme_ids.some(
+            (programme_id) =>
+              patient.programmes[programme_id]?.clinicStatus ===
+              filters.clinicStatus
+          )
         )
-      )
+      } else {
+        results = results.filter((patient) =>
+          Object.values(patient.programmes).some(
+            (programme) => programme.clinicStatus === filters.clinicStatus
+          )
+        )
+      }
     }
 
     // Filter by status
@@ -238,7 +246,7 @@ export const patientController = {
     const params = new URLSearchParams()
 
     // Radios and text inputs
-    for (const key of ['q', 'report']) {
+    for (const key of ['q', 'report', 'clinicStatus']) {
       const value = request.body[key]
       if (value) {
         params.append(key, String(value))
@@ -247,7 +255,6 @@ export const patientController = {
 
     // Checkboxes
     for (const key of [
-      'invitedToClinic',
       'option',
       'patientConsent',
       'patientDeferred',

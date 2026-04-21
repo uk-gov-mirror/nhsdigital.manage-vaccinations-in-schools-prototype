@@ -339,6 +339,18 @@ export const PatientStatus = {
  * @readonly
  * @enum {string}
  */
+export const PatientClinicStatus = {
+  Ready: 'Can be invited',
+  Invited: 'Invited',
+  Booked: 'Booked in',
+  Registered: 'Attending',
+  Completed: 'Attended'
+}
+
+/**
+ * @readonly
+ * @enum {string}
+ */
 export const PatientConsentStatus = {
   NotScheduled: 'No request scheduled',
   Scheduled: 'Request scheduled',

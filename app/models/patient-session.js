@@ -17,7 +17,8 @@ import {
   RegistrationOutcome,
   ScreenOutcome,
   VaccinationOutcome,
-  ProgrammeType
+  ProgrammeType,
+  PatientClinicStatus
 } from '../enums.js'
 import {
   AuditEvent,
@@ -306,6 +307,15 @@ export class PatientSession {
     } catch (error) {
       console.error('PatientSession.session', error.message)
     }
+  }
+
+  /**
+   * Get clinic readiness status
+   *
+   * @returns {PatientClinicStatus|undefined} clinic status for our programme
+   */
+  get clinicStatus() {
+    return this.patientProgramme?.clinicStatus
   }
 
   /**

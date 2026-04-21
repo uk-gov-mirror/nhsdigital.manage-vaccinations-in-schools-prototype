@@ -1,15 +1,23 @@
 import { addMonths, addWeeks } from 'date-fns'
 
 import {
+  ConsentOutcome,
+  PatientClinicStatus,
   PatientConsentStatus,
   PatientDueStatus,
   PatientStatus,
-  ProgrammeType
+  ProgrammeType,
+  RegistrationOutcome,
+  ScreenOutcome,
+  SessionStatus,
+  SessionType,
+  VaccinationOutcome
 } from '../enums.js'
 import { AuditEvent, Patient, Programme, Vaccination } from '../models.js'
 import {
   getCurrentAcademicYear,
-  getDateValueDifference
+  getDateValueDifference,
+  today
 } from '../utils/date.js'
 import { ordinal } from '../utils/number.js'
 import { getReportOutcome } from '../utils/patient-session.js'
@@ -137,6 +145,86 @@ export class PatientProgramme {
       this.status !== PatientStatus.Ineligible &&
       this.status !== PatientStatus.Vaccinated
     )
+  }
+
+  /**
+   * Get the patient's clinic status for this programme
+   *
+   * @returns {PatientClinicStatus|boolean} - the patient's clinic status for this programme, or false if clinic not applicable
+   */
+  get clinicStatus() {
+    // Work backwards from the most complete status
+
+    const { lastPatientSession } = this // should we look beyond the last session?
+    if (
+      lastPatientSession &&
+      lastPatientSession.session.type === SessionType.Clinic
+    ) {
+      // Clinic vaccination has already happened?
+      if (lastPatientSession.outcome === VaccinationOutcome.Vaccinated) {
+        return PatientClinicStatus.Completed
+      }
+
+      // Attending a clinic right now?
+      if (lastPatientSession.register === RegistrationOutcome.Present) {
+        return PatientClinicStatus.Registered
+      }
+
+      // For the PatientSession at a clinic to exist, the child must be booked in
+      return PatientClinicStatus.Booked
+    }
+
+    // Invited to a clinic?
+    if (this.invitedToClinic) {
+      return PatientClinicStatus.Invited
+    }
+
+    // Check various disqualifying conditions to see whether the child's ready to invite to clinic...
+    if (lastPatientSession) {
+      const { report, screen, consent, triageNotes } = lastPatientSession
+      // Already vaccinated?
+      if (report === PatientStatus.Vaccinated) {
+        return false
+      }
+      // Triaged as not safe to vaccinate?
+      if (screen === ScreenOutcome.DoNotVaccinate) {
+        return false
+      }
+      // Triaged as needing to delay vaccination and earliest vaccs date not yet passed?
+      if (
+        screen === ScreenOutcome.DelayVaccination &&
+        triageNotes?.at(-1)?.outcomeAt > today()
+      ) {
+        return false
+      }
+      // Refused consent?
+      if (
+        [ConsentOutcome.Refused, ConsentOutcome.FinalRefusal].includes(consent)
+      ) {
+        return false
+      }
+    }
+    // Not old enough for this programme?
+    if (!this.eligible) {
+      return false
+    }
+    // Child's school session for this academic year hasn't happened yet?
+    // (Remember that patient may have only recently moved to the school.)
+    const latestSchoolSession = this.patient?.school?.sessions
+      ?.filter(({ programme_ids }) => programme_ids.includes(this.programme_id))
+      ?.at(-1)
+    if (
+      latestSchoolSession &&
+      ![SessionStatus.Completed, SessionStatus.Closed].includes(
+        latestSchoolSession.status
+      ) &&
+      latestSchoolSession.academicYear === getCurrentAcademicYear()
+    ) {
+      return false
+    }
+
+    // Must be ready to invite, as we've ruled out all disqualifying criteria
+    return PatientClinicStatus.Ready
   }
 
   /**
