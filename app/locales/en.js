@@ -2196,6 +2196,10 @@ export const en = {
   },
   search: {
     label: 'Search',
+    hint: {
+      patient: 'Search by name, NHS number, postcode, and more',
+      session: 'Search by location name or postcode'
+    },
     advanced: 'Advanced filters',
     initial:
       'Search for a child or use filters to see children matching your selection',
