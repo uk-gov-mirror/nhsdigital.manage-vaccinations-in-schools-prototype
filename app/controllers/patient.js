@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import {
   ArchiveRecordReason,
+  PatientClinicStatus,
   PatientStatus,
   ProgrammeType,
   SessionPresetName,
@@ -18,7 +19,7 @@ import {
 } from '../models.js'
 import { today } from '../utils/date.js'
 import { getResults, getPagination } from '../utils/pagination.js'
-import { formatYearGroup } from '../utils/string.js'
+import { formatYearGroup, stringToArray } from '../utils/string.js'
 
 export const patientController = {
   read(request, response, next, patient_uuid) {
@@ -233,7 +234,35 @@ export const patientController = {
   },
 
   show(request, response) {
+    const { patient } = response.locals
     const view = request.params.view || 'show'
+
+    if (view === 'invite-to-clinic') {
+      // Order the clinic-ready programmes alphabetically
+      response.locals.clinicReadyProgrammes = Object.values(patient.programmes)
+        .filter(
+          ({ clinicStatus }) => clinicStatus === PatientClinicStatus.Ready
+        )
+        .sort((a, b) => a.programme_id.localeCompare(b.programme_id))
+
+      // Warn about inviting to any programmes that don't have clinics scheduled
+      const programmesWithoutClinics =
+        response.locals.clinicReadyProgrammes.filter(
+          (patientProgramme) => patientProgramme.scheduledClinicCount === 0
+        )
+      const formatter = new Intl.ListFormat('en', {
+        style: 'long',
+        type: 'disjunction'
+      })
+      response.locals.clinicReadyProgrammesWithoutClinics = {
+        count: programmesWithoutClinics.length,
+        names: formatter.format(
+          programmesWithoutClinics.map(({ programme }) =>
+            programme.name.replace('Flu', 'flu')
+          )
+        )
+      }
+    }
 
     response.render(`patient/${view}`)
   },
@@ -379,6 +408,45 @@ export const patientController = {
 
   showProgramme(request, response) {
     response.render(`patient/programme`)
+  },
+
+  inviteToClinic(request, response) {
+    const { patient_uuid } = request.params
+    const { data } = request.session
+    const { __ } = response.locals
+
+    // Strip any _unchecked value from the selected programme IDs
+    let { clinicProgramme_ids } = request.body
+    if (typeof clinicProgramme_ids === 'string') {
+      clinicProgramme_ids = [clinicProgramme_ids]
+    } else {
+      clinicProgramme_ids = stringToArray(clinicProgramme_ids)
+    }
+
+    // TODO: Record the invitation in audit events?
+
+    // Update the record of programmes for which the patient's been invited to clinic
+    const patient = Patient.update(patient_uuid, { clinicProgramme_ids }, data)
+
+    // Report the success
+    const formatter = new Intl.ListFormat('en', {
+      style: 'long',
+      type: 'conjunction'
+    })
+    const selectedProgrammeNames = formatter.format(
+      clinicProgramme_ids.map((programme_id) =>
+        Programme.findOne(programme_id, data)?.name?.replace('Flu', 'flu')
+      )
+    )
+    request.flash(
+      'success',
+      __('patient.inviteToClinic.success', {
+        patientName: patient.firstName,
+        selectedProgrammes: selectedProgrammeNames
+      })
+    )
+
+    response.redirect(patient.uri)
   },
 
   archive(request, response) {

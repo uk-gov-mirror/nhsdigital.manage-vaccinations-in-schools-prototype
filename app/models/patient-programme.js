@@ -13,7 +13,13 @@ import {
   SessionType,
   VaccinationOutcome
 } from '../enums.js'
-import { AuditEvent, Patient, Programme, Vaccination } from '../models.js'
+import {
+  AuditEvent,
+  Patient,
+  Programme,
+  Session,
+  Vaccination
+} from '../models.js'
 import {
   getCurrentAcademicYear,
   getDateValueDifference,
@@ -225,6 +231,19 @@ export class PatientProgramme {
 
     // Must be ready to invite, as we've ruled out all disqualifying criteria
     return PatientClinicStatus.Ready
+  }
+
+  /**
+   * Get the number of clinics scheduled for this programme
+   *
+   * @returns {number} - the number of scheduled clinics targeting this programme
+   */
+  get scheduledClinicCount() {
+    const scheduledClinics = Session.findAll(this.context)
+      ?.filter(({ programme_ids }) => programme_ids.includes(this.programme_id))
+      ?.filter(({ type }) => type === SessionType.Clinic)
+      ?.filter(({ status }) => status === SessionStatus.Planned)
+    return scheduledClinics?.length || 0
   }
 
   /**

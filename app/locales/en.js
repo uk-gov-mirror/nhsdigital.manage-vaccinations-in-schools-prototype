@@ -1330,6 +1330,34 @@ export const en = {
         hint: 'This will merge the duplicate records into a single record'
       }
     },
+    inviteToClinic: {
+      title: {
+        multiple:
+          'Which programmes do you want to send a clinic booking invitation for?',
+        single:
+          'Send a clinic booking invitation for {{firstName}} {{lastName}}'
+      },
+      clinicCount: {
+        hint: '{count, plural, =0 {No clinics are scheduled for {programmeName}} one {1 clinic is scheduled for {programmeName}} other {# clinics are scheduled for {programmeName}}}',
+        paragraph:
+          '{count, plural, one {There is 1 clinic scheduled for the {programmeName} programme.} other {There are # clinics scheduled for the {programmeName} programme.}}'
+      },
+      scheduledClinicWarning: {
+        multiple: {
+          title: 'Programmes without clinics',
+          description:
+            '{count, plural, one {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only select this option if you’re able to offer it as a catch-up alongside other vaccinations.} other {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only select these options if you’re able to offer them as a catch-up alongside other vaccinations.}}'
+        },
+        single: {
+          title: 'Programmes without clinics',
+          description:
+            '{count, plural, one {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only send an invitation if you’re able to offer it as a catch-up alongside other vaccinations.} other {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only send an invitation if you’re able to offer them as a catch-up alongside other vaccinations.}}'
+        }
+      },
+      confirm: 'Send clinic invitation',
+      success:
+        '{{patientName}} has been invited to attend a clinic for {{selectedProgrammes}} vaccination'
+    },
     auditEvents: {
       label: 'Activity log'
     },

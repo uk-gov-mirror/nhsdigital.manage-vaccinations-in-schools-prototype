@@ -34,6 +34,7 @@ import {
   formatOther,
   formatParent,
   formatWithSecondaryText,
+  stringToArray,
   stringToBoolean
 } from '../utils/string.js'
 
@@ -562,6 +563,11 @@ export class Patient extends Child {
    * @static
    */
   static update(uuid, updates, context, log = false) {
+    // Sanitise any checkbox values in the updates
+    if (updates?.clinicProgramme_ids) {
+      updates.clinicProgramme_ids = stringToArray(updates.clinicProgramme_ids)
+    }
+
     const patient = Patient.findOne(uuid, context)
     const updatedPatient = _.merge(Patient.findOne(uuid, context), updates)
 

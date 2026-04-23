@@ -1,0 +1,79 @@
+{% extends "_layouts/form.njk" %}
+
+{% set paths = { back: patient.uri } %}
+{% if clinicReadyProgrammes.length > 1 %}
+  {% set title = __("patient.inviteToClinic.title.multiple") %}
+{% else %}
+  {% set title = __("patient.inviteToClinic.title.single", { firstName: patient.firstName, lastName: patient.lastName }) %}
+{% endif %}
+{% set confirmButtonText = __("patient.inviteToClinic.confirm") %}
+
+{% set checkboxItems = [] %}
+{% for patientProgramme in clinicReadyProgrammes %}
+  {% set checkboxItems = checkboxItems | push({
+    text: patientProgramme.programme.type,
+    value: patientProgramme.programme_id,
+    hint: { text: __mf("patient.inviteToClinic.clinicCount.hint",
+      {
+        programmeName: patientProgramme.programme.name | replace("Flu", "flu"),
+        count: patientProgramme.scheduledClinicCount
+      })
+    }
+  }) %}
+{% endfor %}
+
+{% block form %}
+  {{ appHeading({
+    attributes: {
+      "id": "checkboxes-heading"
+    },
+    caption: patient.fullName,
+    title: title
+  }) }}
+
+  {% if clinicReadyProgrammes.length > 1 %}
+    {# Let the user choose which programmes to invite for, based on availability of clinics #}
+    {{ checkboxes({
+      fieldset: {
+        attributes: {
+          "aria-labelledby": "checkboxes-heading"
+        }
+      },
+      items: checkboxItems,
+      decorate: "clinicProgramme_ids"
+    }) }}
+  
+    {{ warningCallout({
+      heading: __("patient.inviteToClinic.scheduledClinicWarning.multiple.title"),
+      text: __mf("patient.inviteToClinic.scheduledClinicWarning.multiple.description",
+        {
+          programmeNames: clinicReadyProgrammesWithoutClinics.names,
+          count: clinicReadyProgrammesWithoutClinics.count
+        }) | safe
+    }) if clinicReadyProgrammesWithoutClinics.count > 0 }}
+  {% else %}
+    {#
+      There must be only 1 clinic ready programme, so only show the paragraph about number of clinics
+      for this one programme if there actually are some. Otherwise, lean on the warning callout.
+    #}
+    {% if clinicReadyProgrammesWithoutClinics.length === 0 %}
+      {{ __mf("patient.inviteToClinic.clinicCount.paragraph",
+      {
+        programmeName: clinicReadyProgrammes[0].programme.name | replace("Flu", "flu"),
+        count: clinicReadyProgrammes[0].scheduledClinicCount
+      }) }}
+    {% else %}
+      {{ warningCallout({
+        heading: __("patient.inviteToClinic.scheduledClinicWarning.single.title"),
+        text: __mf("patient.inviteToClinic.scheduledClinicWarning.single.description",
+          {
+            programmeNames: clinicReadyProgrammesWithoutClinics.names,
+            count: clinicReadyProgrammesWithoutClinics.count
+          }) | safe
+      }) if clinicReadyProgrammesWithoutClinics.count > 0 }}
+    {% endif %}
+
+    {# Fake the user's selection of a checkbox for this programme #}
+    <input type="hidden" id="clinicProgramme_ids" name="clinicProgramme_ids" value="{{clinicReadyProgrammes[0].programme_id}}" />
+  {% endif %}
+{% endblock %}
