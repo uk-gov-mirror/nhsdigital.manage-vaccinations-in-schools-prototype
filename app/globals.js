@@ -245,11 +245,13 @@ export default () => {
    * @returns {object} Checkbox items
    */
   globals.checkboxFilterItems = function (Enum, selected) {
-    return Object.values(Enum).map((value) => ({
-      text: value,
-      value,
-      checked: value === selected
-    }))
+    return Object.values(Enum)
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({
+        text: value,
+        value,
+        checked: value === selected
+      }))
   }
 
   /**
@@ -266,11 +268,13 @@ export default () => {
         value: 'none',
         checked: !selected || selected === 'none'
       },
-      ...Object.values(Enum).map((value) => ({
-        text: value,
-        value,
-        checked: value === selected
-      }))
+      ...Object.values(Enum)
+        .sort((a, b) => a.localeCompare(b))
+        .map((value) => ({
+          text: value,
+          value,
+          checked: value === selected
+        }))
     ]
   }
 
