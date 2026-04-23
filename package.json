@@ -46,7 +46,7 @@
   "peerDependencies": {
     "@x-govuk/govuk-prototype-filters": "^2.1.0",
     "express": "^5.2.1",
-    "nhsuk-frontend": "^10.4.2"
+    "nhsuk-frontend": "github:nhsuk/nhsuk-frontend#6d383d9e7"
   },
   "engines": {
     "node": "^24"

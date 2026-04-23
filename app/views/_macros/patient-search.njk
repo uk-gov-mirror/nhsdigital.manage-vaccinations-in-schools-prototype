@@ -5,8 +5,8 @@
 {%- from "nhsuk/components/button/macro.njk" import button with context -%}
 {%- from "nhsuk/components/card/macro.njk" import card with context -%}
 {%- from "nhsuk/components/details/macro.njk" import details with context -%}
+{%- from "nhsuk/components/search-input/macro.njk" import searchInput with context -%}
 {%- from "_macros/button-group.njk" import appButtonGroup with context -%}
-{%- from "_macros/search-input.njk" import appSearchInput with context -%}
 
 {% macro appPatientSearch(params) %}
   {% if session %}
@@ -43,8 +43,11 @@
     heading: __("patient.search.label") ,
     headingLevel: 3
   }) %}
-    {{ appSearchInput({
-      label: { text: __("search.label") },
+    {{ searchInput({
+      label: {
+        classes: "nhsuk-u-visually-hidden",
+        text: __("search.label")
+      },
       attributes: {
         formaction: params.formaction,
         formmethod: "post"
