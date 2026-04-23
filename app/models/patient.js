@@ -793,7 +793,7 @@ export class Patient extends Child {
    */
   saveNote(event) {
     this.addEvent({
-      name: activity.note,
+      name: activity.note.created(AuditEventType.RecordNote),
       note: event.note,
       type: AuditEventType.Record,
       createdBy_uid: event.createdBy_uid
