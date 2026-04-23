@@ -2055,6 +2055,7 @@ export const en = {
     urn: {
       label: 'School URN',
       title: 'Find a school to add to your team',
+      hint: 'If the school does not have a URN, contact the Mavis team',
       error:
         'URN must be for a school that is not already assigned to another team'
     },
