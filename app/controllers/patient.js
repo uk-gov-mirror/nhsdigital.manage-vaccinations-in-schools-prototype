@@ -220,7 +220,7 @@ export const patientController = {
     }))
 
     // Clean up session data
-    delete data.invitedToClinic
+    delete data.clinicStatus
     delete data.option
     delete data.patientConsent
     delete data.patientDeferred
@@ -425,10 +425,11 @@ export const patientController = {
       clinicProgramme_ids = stringToArray(clinicProgramme_ids)
     }
 
-    // TODO: Record the invitation in audit events?
-
     // Update the record of programmes for which the patient's been invited to clinic
     const patient = Patient.update(patient_uuid, { clinicProgramme_ids }, data)
+
+    // Send comms to parents and record in audit trail
+    patient.inviteToClinic(clinicProgramme_ids)
 
     // Report the success
     const formatter = new Intl.ListFormat('en', {

@@ -665,18 +665,16 @@ export class Patient extends Child {
   /**
    * Invite parent to book a clinic appointment
    *
-   * @param {import('./session.js').Session} session - Clinic session
+   * @param {Array<string>} programme_ids - The programmes for which the child's invited
    */
-  inviteToClinic(session) {
+  inviteToClinic(programme_ids) {
     for (const parent of this.parents) {
       this.addEvent({
         name: activity.notify['invite-clinic'](parent),
         messageRecipient: parent,
         messageTemplate: 'invite-clinic',
-        createdAt: session.openAt,
         patient_uuid: this.uuid,
-        programme_ids: session.programme_ids,
-        session_id: session.id
+        programme_ids: programme_ids
       })
     }
   }
