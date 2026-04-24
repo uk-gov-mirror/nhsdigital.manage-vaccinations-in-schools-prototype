@@ -1,14 +1,13 @@
 import { addMonths, addWeeks } from 'date-fns'
 
 import {
-  ConsentOutcome,
   PatientClinicStatus,
   PatientConsentStatus,
+  PatientDeferredStatus,
   PatientDueStatus,
   PatientStatus,
   ProgrammeType,
   RegistrationOutcome,
-  ScreenOutcome,
   SessionStatus,
   SessionType,
   VaccinationOutcome
@@ -185,58 +184,65 @@ export class PatientProgramme {
       return PatientClinicStatus.Invited
     }
 
-    // Check various disqualifying conditions to see whether the child's ready to invite to clinic...
+    // Maybe we *can* vaccinate the child, but there are no school sessions left?
+    if (this.canVaccinateAtClinic && !this.schoolSessionPending) {
+      return PatientClinicStatus.Ready
+    }
 
-    // Not old enough for this programme?
-    if (!this.eligible) {
+    return false
+  }
+
+  /**
+   * Can the child be vaccinated (assuming we get the right consent and triage outcomes, if required)?
+   *
+   * @returns {boolean} - true if it's ok to invite to clinic for a vaccination based on patient status, or false otherwise
+   */
+  get canVaccinateAtClinic() {
+    const { status } = this
+
+    switch (status) {
+      case PatientStatus.Due:
+      case PatientStatus.Triage:
+        return true
+      case PatientStatus.Deferred: {
+        switch (this.lastPatientSession?.patientDeferred) {
+          case PatientDeferredStatus.DoNotVaccinate:
+            return false
+          case PatientDeferredStatus.DelayVaccination: {
+            const firstSafeDate =
+              this.lastPatientSession?.triageNotes?.at(-1)?.outcomeAt
+            return firstSafeDate === undefined || today() > firstSafeDate
+          }
+          default:
+            return true
+        }
+      }
+      case PatientStatus.Consent:
+        return !this.patient?.hasNoContactDetails
+      default:
+        return false
+    }
+  }
+
+  /**
+   * Does the patient still have a chance to get vaccinated at school this academic year?
+   *
+   * @returns {boolean} - true if there's still a chance for school vaccination, or false otherwise
+   */
+  get schoolSessionPending() {
+    const school = this.patient?.school
+    if (school?.homeOrUnknown) {
       return false
     }
-    if (lastPatientSession) {
-      const { report, screen, triageNotes } = lastPatientSession
-      // Already vaccinated?
-      if (report === PatientStatus.Vaccinated) {
-        return false
-      }
-      // Refused consent?
-      if (report === PatientStatus.Refused) {
-        return false
-      }
-      // Need consent, but no contact details?
-      if (
-        report === PatientStatus.Consent &&
-        lastPatientSession.patientConsent === PatientConsentStatus.NoDetails
-      ) {
-        return false
-      }
-      // Triaged as not safe to vaccinate?
-      if (screen === ScreenOutcome.DoNotVaccinate) {
-        return false
-      }
-      // Triaged as needing to delay vaccination and earliest vaccs date not yet passed?
-      if (
-        screen === ScreenOutcome.DelayVaccination &&
-        triageNotes?.at(-1)?.outcomeAt > today()
-      ) {
-        return false
-      }
-    }
-    // Child's school session for this academic year hasn't happened yet?
-    // (Remember that patient may have only recently moved to the school.)
-    const latestSchoolSession = this.patient?.school?.sessions
+
+    const latestSchoolSession = school?.sessions
       ?.filter(({ programme_ids }) => programme_ids.includes(this.programme_id))
       ?.at(-1)
-    if (
-      latestSchoolSession &&
+    return (
       ![SessionStatus.Completed, SessionStatus.Closed].includes(
-        latestSchoolSession.status
-      ) &&
-      latestSchoolSession.academicYear === getCurrentAcademicYear()
-    ) {
-      return false
-    }
-
-    // Must be ready to invite, as we've ruled out all disqualifying criteria
-    return PatientClinicStatus.Ready
+        latestSchoolSession?.status
+      ) && latestSchoolSession?.academicYear === getCurrentAcademicYear()
+    )
   }
 
   /**
