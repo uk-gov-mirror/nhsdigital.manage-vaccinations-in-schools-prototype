@@ -5,6 +5,7 @@ import {
   PatientConsentStatus,
   PatientDeferredStatus,
   PatientDueStatus,
+  PatientRefusedStatus,
   PatientStatus,
   ProgrammeType,
   RegistrationOutcome,
@@ -219,6 +220,11 @@ export class PatientProgramme {
       }
       case PatientStatus.Consent:
         return !this.patient?.hasNoContactDetails
+      case PatientStatus.Refused:
+        return (
+          this.lastPatientSession?.patientRefused ===
+          PatientRefusedStatus.FollowUp
+        )
       default:
         return false
     }
