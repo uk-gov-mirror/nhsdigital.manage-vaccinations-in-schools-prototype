@@ -1,12 +1,17 @@
 {% extends "_layouts/form.njk" %}
 
 {% set paths = { back: patient.uri } %}
+{% set confirmButtonText = __("patient.inviteToClinic.confirm") %}
+
 {% if clinicReadyProgrammes.length > 1 %}
   {% set title = __("patient.inviteToClinic.title.multiple") %}
 {% else %}
-  {% set title = __("patient.inviteToClinic.title.single", { firstName: patient.firstName, lastName: patient.lastName }) %}
+  {% if clinicReadyProgrammesWithoutClinics.count === 0 %}
+    {% set title = __("patient.inviteToClinic.title.single.clinicsScheduled", { firstName: patient.firstName, lastName: patient.lastName }) %}
+  {% else %}
+    {% set title = __("patient.inviteToClinic.title.single.noClinicsScheduled", { firstName: patient.firstName, lastName: patient.lastName }) %}
+  {% endif %}
 {% endif %}
-{% set confirmButtonText = __("patient.inviteToClinic.confirm") %}
 
 {% set checkboxItems = [] %}
 {% for patientProgramme in clinicReadyProgrammes %}
@@ -32,7 +37,10 @@
   }) }}
 
   {% if clinicReadyProgrammes.length > 1 %}
-    {# Let the user choose which programmes to invite for, based on availability of clinics #}
+    {#
+      The child is clinic-ready for multiple programmes, so we'll offer checkboxes to invite to all of them,
+      regardless of clinic availability — but warn if any don't have clinics available
+    #}
     {{ checkboxes({
       fieldset: {
         attributes: {
@@ -44,8 +52,8 @@
     }) }}
   
     {{ warningCallout({
-      heading: __("patient.inviteToClinic.scheduledClinicWarning.multiple.title"),
-      text: __mf("patient.inviteToClinic.scheduledClinicWarning.multiple.description",
+      heading: __("patient.inviteToClinic.scheduledClinicWarning.title"),
+      text: __mf("patient.inviteToClinic.scheduledClinicWarning.description",
         {
           programmeNames: clinicReadyProgrammesWithoutClinics.names,
           count: clinicReadyProgrammesWithoutClinics.count
@@ -53,27 +61,45 @@
     }) if clinicReadyProgrammesWithoutClinics.count > 0 }}
   {% else %}
     {#
-      There must be only 1 clinic ready programme, so only show the paragraph about number of clinics
+      There must be exactly 1 clinic-ready programme, so only show the paragraph about number of clinics
       for this one programme if there actually are some. Otherwise, lean on the warning callout.
     #}
-    {% if clinicReadyProgrammesWithoutClinics.length === 0 %}
-      {{ __mf("patient.inviteToClinic.clinicCount.paragraph",
+    {% if clinicReadyProgrammesWithoutClinics.count === 0 %}
+      {# Tell the user how many clinics are available for this child's one clinic-ready programme #}
+      {{ __mf("patient.inviteToClinic.clinicCount.someParagraph",
       {
         programmeName: clinicReadyProgrammes[0].programme.name | replace("Flu", "flu"),
         count: clinicReadyProgrammes[0].scheduledClinicCount
-      }) }}
+      }) | nhsukMarkdown }}
     {% else %}
-      {{ warningCallout({
-        heading: __("patient.inviteToClinic.scheduledClinicWarning.single.title"),
-        text: __mf("patient.inviteToClinic.scheduledClinicWarning.single.description",
+      {# Tell the user there are NO clinics available for this child's one clinic-ready programme #}
+      {{ __("patient.inviteToClinic.clinicCount.noneParagraph",
           {
-            programmeNames: clinicReadyProgrammesWithoutClinics.names,
-            count: clinicReadyProgrammesWithoutClinics.count
-          }) | safe
-      }) if clinicReadyProgrammesWithoutClinics.count > 0 }}
+            programmeName: clinicReadyProgrammesWithoutClinics.names
+          }) | nhsukMarkdown
+      }}
     {% endif %}
 
     {# Fake the user's selection of a checkbox for this programme #}
     <input type="hidden" id="clinicProgramme_ids" name="clinicProgramme_ids" value="{{clinicReadyProgrammes[0].programme_id}}" />
   {% endif %}
 {% endblock %}
+
+{% block afterForm %}
+  {# Include a link to back out if there are no clinics available for the clinic-ready programmes #}
+  {% if clinicReadyProgrammes.length === clinicReadyProgrammesWithoutClinics.count %}
+    {{ appButtonGroup({
+      buttons: [{
+        text: confirmButtonText,
+        variant: confirmButtonVariant
+      }],
+      links: [{
+        text: __("patient.inviteToClinic.cancel"),
+        href: paths.back
+      }]
+    }) }}
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+

@@ -1334,27 +1334,27 @@ export const en = {
       title: {
         multiple:
           'Which programmes do you want to send a clinic booking invitation for?',
-        single:
-          'Send a clinic booking invitation for {{firstName}} {{lastName}}'
+        single: {
+          clinicsScheduled:
+            'Send a clinic booking invitation for {{firstName}} {{lastName}}',
+          noClinicsScheduled:
+            'Are you sure you want to send a clinic booking invitation for {{firstName}} {{lastName}}?'
+        }
       },
       clinicCount: {
         hint: '{count, plural, =0 {No clinics are scheduled for {programmeName}} one {1 clinic is scheduled for {programmeName}} other {# clinics are scheduled for {programmeName}}}',
-        paragraph:
-          '{count, plural, one {There is 1 clinic scheduled for the {programmeName} programme.} other {There are # clinics scheduled for the {programmeName} programme.}}'
+        someParagraph:
+          '{count, plural, one {There is 1 clinic scheduled for the {programmeName} programme.} other {There are # clinics scheduled for the {programmeName} programme.}}',
+        noneParagraph:
+          'No clinics are scheduled for the {{programmeName}} programme. Only send an invitation if you can offer {{programmeName}} alongside other vaccinations.'
       },
       scheduledClinicWarning: {
-        multiple: {
-          title: 'Programmes without clinics',
-          description:
-            '{count, plural, one {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only select this option if you’re able to offer it as a catch-up alongside other vaccinations.} other {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only select these options if you’re able to offer them as a catch-up alongside other vaccinations.}}'
-        },
-        single: {
-          title: 'Programmes without clinics',
-          description:
-            '{count, plural, one {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only send an invitation if you’re able to offer it as a catch-up alongside other vaccinations.} other {No clinics are scheduled for <b>{programmeNames}</b> vaccinations. Only send an invitation if you’re able to offer them as a catch-up alongside other vaccinations.}}'
-        }
+        title: 'Programmes without clinics',
+        description:
+          '{count, plural, one {No clinics are scheduled for the <b>{programmeNames}</b> programme. Only select this option if you can offer it alongside other vaccinations.} other {No clinics are scheduled for the <b>{programmeNames}</b> programmes. Only select these options if you can offer them alongside other vaccinations.}}'
       },
       confirm: 'Send clinic invitation',
+      cancel: 'Go back to child record',
       success:
         '{{patientName}} has been invited to attend a clinic for {{selectedProgrammes}} vaccination'
     },
