@@ -1462,9 +1462,9 @@ export const en = {
       count:
         '{count, plural, =0 {No vaccination record} one {Vaccination record} other {# vaccination records}}'
     },
-    procedures: {
+    encounters: {
       count:
-        '{count, plural, =0 {No procedures recorded} one {Procedure} other {# procedures}}'
+        '{count, plural, =0 {No encounters recorded} one {Encounter} other {# encounters}}'
     },
     vaccinationRecord: {
       label: 'Vaccination record',
@@ -1474,7 +1474,7 @@ export const en = {
         number: 'Dose {sequence}'
       },
       ignored: {
-        label: 'Ignored'
+        label: 'Out of schedule'
       },
       eligibleFrom: 'Eligible from {date}'
     },

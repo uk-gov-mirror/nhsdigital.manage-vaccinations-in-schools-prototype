@@ -29,7 +29,7 @@
   {% include "patient/_vaccination-record.njk" %}
 
   {% call card({
-    heading: __mf("patientProgramme.procedures.count", {
+    heading: __mf("patientProgramme.encounters.count", {
       count: patientProgramme.vaccinationOutcomes.length
     }),
     headingLevel: 3
@@ -58,7 +58,7 @@
       {% endfor %}
 
       {{ table({
-        id: "procedures",
+        id: "encounters",
         responsive: true,
         head: [
           { text: __("vaccination.createdAt.label") },
