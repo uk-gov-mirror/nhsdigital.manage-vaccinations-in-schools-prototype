@@ -45,6 +45,7 @@
   }) %}
     {{ appSearchInput({
       label: { text: __("search.label") },
+      hint: { text: __("search.hint.patient") },
       attributes: {
         formaction: params.formaction,
         formmethod: "post"
@@ -64,19 +65,16 @@
       decorate: "programme_id"
     }) if programmeItems }}
 
-    {{ checkboxes({
+    {{ radios({
       fieldset: {
         legend: {
           classes: "nhsuk-fieldset__legend--s",
-          text: __("patient.clinicProgramme_ids.label")
+          text: "Clinic status"
         }
       },
       small: true,
-      items: [{
-        text: 'Invited to clinic',
-        value: 'true'
-      }],
-      decorate: "invitedToClinic"
+      items: radioFilterItems(PatientClinicStatus, data["clinicStatus"], false),
+      decorate: "clinicStatus"
     }) }}
 
     {% for name, enums in params.checkboxFilters %}

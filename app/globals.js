@@ -259,22 +259,24 @@ export default () => {
    *
    * @param {object} Enum - Enumerable name
    * @param {string} selected - Selected value
+   * @param {boolean} sorted - true to sort the values alphabetically, false to preserve enum order
    * @returns {object} Radio items
    */
-  globals.radioFilterItems = function (Enum, selected) {
+  globals.radioFilterItems = function (Enum, selected, sorted = true) {
+    const values = sorted
+      ? Object.values(Enum).sort((a, b) => a.localeCompare(b))
+      : Object.values(Enum)
     return [
       {
         text: 'Any',
         value: 'none',
         checked: !selected || selected === 'none'
       },
-      ...Object.values(Enum)
-        .sort((a, b) => a.localeCompare(b))
-        .map((value) => ({
-          text: value,
-          value,
-          checked: value === selected
-        }))
+      ...values.map((value) => ({
+        text: value,
+        value,
+        checked: value === selected
+      }))
     ]
   }
 

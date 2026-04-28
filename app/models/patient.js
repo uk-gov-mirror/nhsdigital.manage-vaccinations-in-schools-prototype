@@ -10,6 +10,7 @@ import {
   Impairment,
   NoticeType,
   NotifyEmailStatus,
+  PatientClinicStatus,
   VaccinationOutcome
 } from '../enums.js'
 import {
@@ -34,6 +35,7 @@ import {
   formatOther,
   formatParent,
   formatWithSecondaryText,
+  stringToArray,
   stringToBoolean
 } from '../utils/string.js'
 
@@ -339,13 +341,24 @@ export class Patient extends Child {
 
       // Patient invited to clinic if invitation needed and invitation sent
       patientProgramme.invitedToClinic =
-        patientProgramme.inviteToSession &&
+        patientProgramme.canInviteToSession &&
         this.clinicProgramme_ids.includes(programme.id)
 
       programmes[programme.id] = patientProgramme
     }
 
     return programmes
+  }
+
+  /**
+   * Get the IDs of programmes for which this patient can be invited to clinic
+   *
+   * @returns {Array<string>} the IDs of programmes for which this patient is clinic-ready
+   */
+  get clinicReadyProgramme_ids() {
+    return Object.values(this.programmes)
+      .filter(({ clinicStatus }) => clinicStatus === PatientClinicStatus.Ready)
+      .map(({ programme_id }) => programme_id)
   }
 
   /**
@@ -562,6 +575,11 @@ export class Patient extends Child {
    * @static
    */
   static update(uuid, updates, context, log = false) {
+    // Sanitise any checkbox values in the updates
+    if (updates?.clinicProgramme_ids) {
+      updates.clinicProgramme_ids = stringToArray(updates.clinicProgramme_ids)
+    }
+
     const patient = Patient.findOne(uuid, context)
     const updatedPatient = _.merge(Patient.findOne(uuid, context), updates)
 
@@ -642,9 +660,12 @@ export class Patient extends Child {
   /**
    * Add patient to session
    *
-   * @param {import('./session.js').Session} session - Session
+   * @param {import('./patient-session.js').PatientSession} patientSession - PatientSession
    */
-  addToSession(session) {
+  addToSession(patientSession) {
+    this.patientSession_uuids.push(patientSession.uuid)
+
+    const session = patientSession.session
     this.addEvent({
       name: activity.session.added(session),
       createdAt: session.openAt,
@@ -656,18 +677,20 @@ export class Patient extends Child {
   /**
    * Invite parent to book a clinic appointment
    *
-   * @param {import('./session.js').Session} session - Clinic session
+   * @param {Array<string>} programme_ids - The programmes for which the child's invited
    */
-  inviteToClinic(session) {
+  inviteToClinic(programme_ids) {
+    this.clinicProgramme_ids = [
+      ...new Set(this.clinicProgramme_ids.concat(programme_ids))
+    ]
+
     for (const parent of this.parents) {
       this.addEvent({
         name: activity.notify['invite-clinic'](parent),
         messageRecipient: parent,
         messageTemplate: 'invite-clinic',
-        createdAt: session.openAt,
         patient_uuid: this.uuid,
-        programme_ids: session.programme_ids,
-        session_id: session.id
+        programme_ids: programme_ids
       })
     }
   }
@@ -678,8 +701,6 @@ export class Patient extends Child {
    * @param {import('./patient-session.js').PatientSession} patientSession - Patient session
    */
   requestConsent(patientSession) {
-    this.patientSession_uuids.push(patientSession.uuid)
-
     for (const parent of this.parents) {
       if (parent.email && parent.emailStatus === NotifyEmailStatus.Delivered) {
         this.addEvent({

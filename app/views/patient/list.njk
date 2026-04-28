@@ -38,12 +38,17 @@
           level: 2,
           size: "m",
           title: __("search.results"),
-          summary: __mf("patient.results", {
+          summary: __mf("patient.results.summary", {
             from: results.from,
             to: results.to,
             count: results.count
           }) | safe
         }) }}
+
+        {{ actionLink({
+          text: __mf("patient.results.inviteToClinic", { count: results.count }),
+          href: "/patients/invite-to-clinic" + query | asQueryString
+        }) if showingClinicReady and results.count > 0 }}
 
         {% for patient in results.page %}
           {% set reportStatusHtml -%}

@@ -294,6 +294,7 @@ export const sessionController = {
       instruct: request.query.instruct || 'none',
       register: request.query.register || 'none',
       report: request.query.report || 'none',
+      clinicStatus: request.query.clinicStatus || 'none',
       patientConsent: request.query.patientConsent || 'none',
       patientDeferred: request.query.patientDeferred || 'none',
       patientRefused: request.query.patientRefused || 'none',
@@ -453,7 +454,7 @@ export const sessionController = {
     const params = new URLSearchParams()
 
     // Radios
-    for (const key of ['q', 'instruct', 'register', 'report']) {
+    for (const key of ['q', 'clinicStatus', 'instruct', 'register', 'report']) {
       const value = request.body[key]
       if (value) {
         params.append(key, String(value))
@@ -819,22 +820,34 @@ export const sessionController = {
       )
 
     // Find patients to invite to clinic
-    const patientUuidsForClinic = session.patientSessionsForClinic.map(
-      (patient) => patient.uuid
+    const patientSessionUuidsForClinic = session.patientSessionsForClinic.map(
+      (patientSession) => patientSession.uuid
     )
 
     if (clinic) {
       // Move patients to clinic
-      for (const patientUuid of patientUuidsForClinic) {
-        const patientSession = PatientSession.findOne(patientUuid, data)
+      for (const patientSessionUuid of patientSessionUuidsForClinic) {
+        const patientSession = PatientSession.findOne(patientSessionUuid, data)
 
         if (patientSession) {
           patientSession.removeFromSession({
             createdBy_uid: account.uid
           })
-          patientSession.patient.addToSession(patientSession.session)
+          let clinicPatientSession = PatientSession.create(
+            {
+              createdBy_uid: account.uid,
+              patient_uuid: patientSession.patient_uuid,
+              programme_id: patientSession.programme_id,
+              session_id
+            },
+            data
+          )
+          clinicPatientSession = new PatientSession(clinicPatientSession, data)
+          patientSession.patient.addToSession(clinicPatientSession)
 
-          Patient.update(patientSession.patient_uuid, {}, data)
+          const patient = Patient.findOne(patientSession.patient_uuid, data)
+          patient.inviteToClinic(clinic.programme_ids)
+          Patient.update(patient.uuid, patient, data)
         }
       }
     }
@@ -842,7 +855,7 @@ export const sessionController = {
     request.flash(
       'success',
       __mf(`session.inviteToClinic.success`, {
-        count: patientUuidsForClinic.length
+        count: patientSessionUuidsForClinic.length
       })
     )
 

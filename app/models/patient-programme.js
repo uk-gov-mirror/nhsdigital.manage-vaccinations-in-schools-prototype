@@ -1,15 +1,29 @@
 import { addMonths, addWeeks } from 'date-fns'
 
 import {
+  PatientClinicStatus,
   PatientConsentStatus,
+  PatientDeferredStatus,
   PatientDueStatus,
+  PatientRefusedStatus,
   PatientStatus,
-  ProgrammeType
+  ProgrammeType,
+  RegistrationOutcome,
+  SessionStatus,
+  SessionType,
+  VaccinationOutcome
 } from '../enums.js'
-import { AuditEvent, Patient, Programme, Vaccination } from '../models.js'
+import {
+  AuditEvent,
+  Patient,
+  Programme,
+  Session,
+  Vaccination
+} from '../models.js'
 import {
   getCurrentAcademicYear,
-  getDateValueDifference
+  getDateValueDifference,
+  today
 } from '../utils/date.js'
 import { ordinal } from '../utils/number.js'
 import { getReportOutcome } from '../utils/patient-session.js'
@@ -132,11 +146,122 @@ export class PatientProgramme {
    *
    * @returns {boolean} Eligible for vaccination
    */
-  get inviteToSession() {
+  get canInviteToSession() {
     return (
       this.status !== PatientStatus.Ineligible &&
       this.status !== PatientStatus.Vaccinated
     )
+  }
+
+  /**
+   * Get the patient's clinic status for this programme
+   *
+   * @returns {PatientClinicStatus|boolean} - the patient's clinic status for this programme, or false if clinic not applicable
+   */
+  get clinicStatus() {
+    // Work backwards from the most complete status
+
+    const { lastPatientSession } = this // should we look beyond the last session?
+    if (
+      lastPatientSession &&
+      lastPatientSession.session.type === SessionType.Clinic
+    ) {
+      // Clinic vaccination has already happened?
+      if (lastPatientSession.outcome === VaccinationOutcome.Vaccinated) {
+        return PatientClinicStatus.Completed
+      }
+
+      // Attending a clinic right now?
+      if (lastPatientSession.register === RegistrationOutcome.Present) {
+        return PatientClinicStatus.Registered
+      }
+
+      // For the PatientSession at a clinic to exist, the child must be booked in
+      return PatientClinicStatus.Booked
+    }
+
+    // Invited to a clinic?
+    if (this.invitedToClinic) {
+      return PatientClinicStatus.Invited
+    }
+
+    // Maybe we *can* vaccinate the child, but there are no school sessions left?
+    if (this.canVaccinateAtClinic && !this.schoolSessionPending) {
+      return PatientClinicStatus.Ready
+    }
+
+    return false
+  }
+
+  /**
+   * Can the child be vaccinated (assuming we get the right consent and triage outcomes, if required)?
+   *
+   * @returns {boolean} - true if it's ok to invite to clinic for a vaccination based on patient status, or false otherwise
+   */
+  get canVaccinateAtClinic() {
+    const { status } = this
+
+    switch (status) {
+      case PatientStatus.Due:
+      case PatientStatus.Triage:
+        return true
+      case PatientStatus.Deferred: {
+        switch (this.lastPatientSession?.patientDeferred) {
+          case PatientDeferredStatus.DoNotVaccinate:
+            return false
+          case PatientDeferredStatus.DelayVaccination: {
+            const firstSafeDate =
+              this.lastPatientSession?.triageNotes?.at(-1)?.outcomeAt
+            return firstSafeDate === undefined || today() > firstSafeDate
+          }
+          default:
+            return true
+        }
+      }
+      case PatientStatus.Consent:
+        return !this.patient?.hasNoContactDetails
+      case PatientStatus.Refused:
+        return (
+          this.lastPatientSession?.patientRefused ===
+          PatientRefusedStatus.FollowUp
+        )
+      default:
+        return false
+    }
+  }
+
+  /**
+   * Does the patient still have a chance to get vaccinated at school this academic year?
+   *
+   * @returns {boolean} - true if there's still a chance for school vaccination, or false otherwise
+   */
+  get schoolSessionPending() {
+    const school = this.patient?.school
+    if (school?.homeOrUnknown) {
+      return false
+    }
+
+    const latestSchoolSession = school?.sessions
+      ?.filter(({ programme_ids }) => programme_ids.includes(this.programme_id))
+      ?.at(-1)
+    return (
+      ![SessionStatus.Completed, SessionStatus.Closed].includes(
+        latestSchoolSession?.status
+      ) && latestSchoolSession?.academicYear === getCurrentAcademicYear()
+    )
+  }
+
+  /**
+   * Get the number of clinics scheduled for this programme
+   *
+   * @returns {number} - the number of scheduled clinics targeting this programme
+   */
+  get scheduledClinicCount() {
+    const scheduledClinics = Session.findAll(this.context)
+      ?.filter(({ programme_ids }) => programme_ids.includes(this.programme_id))
+      ?.filter(({ type }) => type === SessionType.Clinic)
+      ?.filter(({ status }) => status === SessionStatus.Planned)
+    return scheduledClinics?.length || 0
   }
 
   /**

@@ -83,7 +83,9 @@
     }) }}
   {% endcall %}
 
+  {# Vaccination programmes card #}
   {% set patientProgrammeRows = [] %}
+  {% set canInviteToSession = false %}
   {% for id, patientProgramme in patient.programmes %}
     {% set patientProgrammeRows = patientProgrammeRows | push([
       {
@@ -99,23 +101,34 @@
         html: patientProgramme.statusNotes
       }
     ]) %}
+    {% set canInviteToSession = canInviteToSession or patientProgramme.clinicStatus === PatientClinicStatus.Ready %}
   {% endfor %}
 
-  {{ table({
-    id: "programmes",
-    responsive: true,
-    card: {
-      heading: __("patient.programmes.label"),
-      headingLevel: 3
-    },
-    head: [
-      { text: __("patientProgramme.name.label") },
-      { text: __("patientProgramme.status.label") },
-      { text: __("patientProgramme.statusNotes.label") }
-    ],
-    rows: patientProgrammeRows
-  }) }}
+  {% call card({
+    heading: __("patient.programmes.label"),
+    headingLevel: 3,
+    actions: {
+      items: [
+        {
+          text: "Invite to clinic",
+          href: patient.uri + "/invite-to-clinic"
+        } if not patient.archived and canInviteToSession
+      ]
+    }
+  }) %}
+    {{ table({
+      id: "programmes",
+      responsive: true,
+      head: [
+        { text: __("patientProgramme.name.label") },
+        { text: __("patientProgramme.status.label") },
+        { text: __("patientProgramme.statusNotes.label") }
+      ],
+      rows: patientProgrammeRows
+    }) }}
+  {% endcall %}
 
+  {# Activity log card #}
   {{ card({
     heading: __("patient.auditEvents.label"),
     headingLevel: 3,

@@ -153,13 +153,14 @@ export const consentController = {
     const patientSession = PatientSession.create(
       {
         patient_uuid: patient.uuid,
+        programme_id: consent.programme_id,
         session_id: consent.session_id
       },
       data
     )
 
     // Add to session
-    patient.addToSession(patientSession.session)
+    patient.addToSession(patientSession)
 
     // Invite parent to give consent
     patient.requestConsent(patientSession)

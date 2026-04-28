@@ -1330,6 +1330,59 @@ export const en = {
         hint: 'This will merge the duplicate records into a single record'
       }
     },
+    inviteToClinic: {
+      title: {
+        multiple:
+          'Which programmes do you want to send a clinic booking invitation for?',
+        single: {
+          clinicsScheduled:
+            'Send a clinic booking invitation for {{firstName}} {{lastName}}',
+          noClinicsScheduled:
+            'Are you sure you want to send a clinic booking invitation for {{firstName}} {{lastName}}?'
+        }
+      },
+      clinicCount: {
+        hint: '{count, plural, =0 {No clinics are scheduled for {programmeName}} one {1 clinic is scheduled for {programmeName}} other {# clinics are scheduled for {programmeName}}}',
+        someParagraph:
+          '{count, plural, one {There is 1 clinic scheduled for the {programmeName} programme.} other {There are # clinics scheduled for the {programmeName} programme.}}',
+        noneParagraph:
+          'No clinics are scheduled for the {{programmeName}} programme. Only send an invitation if you can offer {{programmeName}} alongside other vaccinations.'
+      },
+      scheduledClinicWarning: {
+        title: 'Programmes without clinics',
+        description:
+          '{count, plural, one {No clinics are scheduled for the <b>{programmeNames}</b> programme. Only select this option if you can offer it alongside other vaccinations.} other {No clinics are scheduled for the <b>{programmeNames}</b> programmes. Only select these options if you can offer them alongside other vaccinations.}}'
+      },
+      confirm: 'Send clinic invitation',
+      cancel: 'Go back to child record',
+      success:
+        '{{patientName}} has been invited to attend a clinic for {{selectedProgrammes}} vaccination'
+    },
+    bulkInviteToClinic: {
+      title: 'Invite parents to book a clinic appointment',
+      caption:
+        '{count, plural, one {1 child selected} other {{count} children selected}}',
+      childrenFragment:
+        '{count, plural, =0 {No children} one {1 child} other {{count} children}}',
+      programmesFragment:
+        '{count, plural, one {the {programmeNames} programme} other {the {programmeNames} programmes}}',
+      anyProgrammesFragment: 'at least one programme',
+      cohortSummary:
+        '{{children}} can be invited to clinic for {{programmes}}.',
+      programme: {
+        label: 'Which programmes do you want to send invitations for?',
+        hint: {
+          children:
+            '{count, plural, one {1 child can be invited for {programmeName}} other {{count} children can be invited for {programmeName}}}',
+          clinics:
+            '{count, plural, =0 {No clinics are scheduled for {programmeName}} one {1 clinic is scheduled for {programmeName}} other {{count} clinics are scheduled for {programmeName}}}',
+          combined: '{{childrenHint}}<br>{{clinicsHint}}'
+        }
+      },
+      confirm: 'Send clinic invitations',
+      success:
+        '{count, plural, one {1 child has been invited to clinic} other {{count} children have been invited to clinic}}'
+    },
     auditEvents: {
       label: 'Activity log'
     },
@@ -1344,8 +1397,12 @@ export const en = {
       label: 'Last reminder sent'
     },
     count: '{count, plural, =0 {No children} one {1 child} other {# children}}',
-    results:
-      '{count, plural, =0 {No children matching your search criteria were found} one {Showing <b>{from}</b> to <b>{to}</b> of <b>{count}</b> record} other {Showing <b>{from}</b> to <b>{to}</b> of <b>{count}</b> children}}',
+    results: {
+      summary:
+        '{count, plural, =0 {No children matching your search criteria were found} one {Showing <b>{from}</b> to <b>{to}</b> of <b>{count}</b> record} other {Showing <b>{from}</b> to <b>{to}</b> of <b>{count}</b> children}}',
+      inviteToClinic:
+        '{count, plural, one {Invite 1 child to clinic} other {Invite {count} children to clinic}}'
+    },
     search: {
       label: 'Find children',
       dob: 'Child’s date of birth',
@@ -2164,6 +2221,10 @@ export const en = {
   },
   search: {
     label: 'Search',
+    hint: {
+      patient: 'Search by name, NHS number, postcode, and more',
+      session: 'Search by location name or postcode'
+    },
     advanced: 'Advanced filters',
     initial:
       'Search for a child or use filters to see children matching your selection',

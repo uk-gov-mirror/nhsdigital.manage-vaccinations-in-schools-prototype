@@ -6,9 +6,10 @@
 {{ input({
   classes: "app-search-input__input" + (" " + params.classes if params.classes),
   label: {
-    classes: "nhsuk-u-visually-hidden",
+    classes: "nhsuk-u-font-weight-bold",
     text: params.label.text
   },
+  hint: { text: params.hint.text },
   type: "search",
   autocomplete: "off",
   spellcheck: false,
