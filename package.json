@@ -19,7 +19,8 @@
     "lint:fix": "npm run lint:prettier:fix && npm run lint:js:fix && npm run lint:css:fix",
     "build": "bin/build.sh",
     "start": "nhsuk-prototype-rig",
-    "postinstall": "npm run create-data"
+    "postinstall": "npm run create-data",
+    "heroku-postbuild": "npm run create-data"
   },
   "dependencies": {
     "@faker-js/faker": "^10.4.0",
