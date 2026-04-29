@@ -30,7 +30,7 @@
             },
             dob: {},
             postalCode: {},
-            school: {},
+            schoolName: {},
             parent: {
               label: __("consent.parent.label"),
               value: consent.formatted.parent
@@ -50,6 +50,7 @@
     <div class="nhsuk-grid-column-two-thirds">
       {{ appPatientSearch({
         hideProgrammeStatuses: true,
+        hideClinicStatuses: true,
         clear: "/consents/" + consent.uuid + "/match"
       }) }}
 
@@ -86,7 +87,7 @@
               postalCode: {
                 value: patient.postalCode | highlightQuery(data.q)
               },
-              school: {
+              schoolName: {
                 value: patient.school.name | highlightQuery(data.q)
               },
               parents: {

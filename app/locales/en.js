@@ -224,6 +224,9 @@ export const en = {
     school: {
       label: 'School'
     },
+    schoolName: {
+      label: 'School'
+    },
     gpSurgery: {
       label: 'GP surgery'
     },
@@ -1494,6 +1497,9 @@ export const en = {
       label: 'School',
       title: 'What school does the child go to?'
     },
+    schoolName: {
+      label: 'School'
+    },
     yearGroup: {
       label: 'Year group'
     },
@@ -2453,10 +2459,13 @@ export const en = {
           label: 'Available appointments'
         },
         programmeRequests: {
-          label: '%s requests'
+          label: '%s appointments'
         },
         daysLeft: {
           label: 'Days left to book'
+        },
+        unmatched: {
+          label: 'Unmatched children'
         }
       },
       vaccinators: {
