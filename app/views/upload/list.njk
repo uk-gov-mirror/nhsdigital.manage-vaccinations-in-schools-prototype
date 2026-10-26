@@ -18,7 +18,7 @@
         href: "/uploads/new",
         text: __("session.upload-class-list.title")
       }) }}
-      {{ link("/uploads/guides", __("upload.guides.index.title")) | nhsukMarkdown if account.isSchoolUser }}
+      {{ link("/uploads/guides", __("upload.guides.index.title")) | nhsukMarkdown }}
     </div>
   {% else %}
     {{ actionLink({
@@ -121,9 +121,7 @@
             schoolStatus: {}
           }) if account.isSchoolUser else summaryRows(upload, {
             fileName: {},
-            type: {
-              value: upload.summary.type
-            },
+            type: {},
             teamStatus: {}
           })
         }) }}
