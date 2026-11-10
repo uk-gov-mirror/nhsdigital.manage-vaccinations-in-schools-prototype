@@ -22,7 +22,8 @@ import { BaseModel } from './base.js'
  * @property {boolean} [canSms] - Get updates via SMS
  * @property {NotifyEmailStatus} [emailStatus] - Email status (of `email`)
  * @property {NotifySmsStatus} [smsStatus] - SMS status (of `tel`)
- * @property {Partial<Contact>} [pendingChanges] - Pending changes to contact details
+ * @property {Array<ContactPointOptions>} [pendingContactPoints] - Contact
+ *   points found in an upload that need review
  */
 
 /**
@@ -87,7 +88,9 @@ export class Contact extends BaseModel {
 
     this.canSms = this.tel ? stringToBoolean(options?.canSms) : undefined
 
-    this.pendingChanges = options?.pendingChanges || {}
+    this.pendingContactPoints = (options?.pendingContactPoints || []).map(
+      (contactPoint) => new ContactPoint(contactPoint, context)
+    )
   }
 
   /**
@@ -368,12 +371,12 @@ export class Contact extends BaseModel {
   }
 
   /**
-   * Has pending changes
+   * Has contact points found in an upload that need review
    *
-   * @returns {boolean} Has pending changes
+   * @returns {boolean} Has pending contact points
    */
-  get hasPendingChanges() {
-    return Object.keys(this.pendingChanges).length > 0
+  get hasPendingContactPoints() {
+    return this.pendingContactPoints.length > 0
   }
 
   /**
