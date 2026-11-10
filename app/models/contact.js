@@ -137,6 +137,24 @@ export class Contact extends BaseModel {
   }
 
   /**
+   * Has been saved (rather than being a copy kept by a reply or booking)
+   *
+   * @returns {boolean} Has been saved
+   */
+  get isSaved() {
+    return !!this.context?.contacts?.[this.uuid]
+  }
+
+  /**
+   * Get contact points, with those that haven’t been archived first
+   *
+   * @returns {Array<ContactPoint>} Contact points
+   */
+  get sortedContactPoints() {
+    return [...this.activeContactPoints, ...this.archivedContactPoints]
+  }
+
+  /**
    * Get contact points that haven’t been archived
    *
    * @returns {Array<ContactPoint>} Contact points
