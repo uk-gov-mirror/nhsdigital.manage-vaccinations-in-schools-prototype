@@ -9,7 +9,6 @@ import {
   ClinicAttendanceType,
   Impairment,
   NoticeType,
-  NotifyEmailStatus,
   PatientClinicStatus,
   SessionStatus,
   SessionType,
@@ -971,10 +970,8 @@ export class Patient extends Child {
       : patientSession.session.consentOpenAt
 
     for (const contact of this.contacts) {
-      if (
-        contact.email &&
-        contact.emailStatus === NotifyEmailStatus.Delivered
-      ) {
+      // Only contacts we know we can reach are sent requests and reminders
+      if (contact.hasDeliveredContactPoint) {
         this.addEvent({
           name: activity.notify.invite(contact),
           type: AuditEventType.ProgrammeNote,
@@ -1032,10 +1029,8 @@ export class Patient extends Child {
     }
 
     for (const contact of this.contacts) {
-      if (
-        contact.email &&
-        contact.emailStatus === NotifyEmailStatus.Delivered
-      ) {
+      // Only contacts we know we can reach are sent requests and reminders
+      if (contact.hasDeliveredContactPoint) {
         patientSession.sendConsentReminder({ createdAt: remindAt }, contact)
       }
     }
