@@ -54,7 +54,10 @@
       canSms: {}
     }) %}
 
-    {{ summaryList({ rows: preferenceRows }) if preferenceRows | length }}
+    {{ summaryList({
+      lastRowBorder: false,
+      rows: preferenceRows
+    }) if preferenceRows | length }}
 
     {% if not contact.isSensitive %}
       {% set contactPointRows = [] %}
