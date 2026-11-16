@@ -41,11 +41,7 @@
         {
           text: __("actions.archive"),
           href: contact.uri + "/archive"
-        } if canChangeContact,
-        {
-          text: __("actions.restore"),
-          href: contact.uri + "/restore"
-        } if canRestoreContact
+        } if canChangeContact
       ]
     } if canChangeContact or canRestoreContact
   }) %}
@@ -85,14 +81,14 @@
                   text: __("actions.restore"),
                   href: contact.uri + "/contact-points/" + contactPoint.uuid + "/restore"
                 }
-              ] if contactPoint.isArchived else [
+              ] if canRestoreContact else [
                 {
                   text: __("actions.archive"),
                   href: contact.uri + "/contact-points/" + contactPoint.uuid + "/archive"
                 }
               ]
             })
-          } if canChangeContact else none
+          }
         ]) %}
       {% endfor %}
 
@@ -114,7 +110,7 @@
           },
           {
             text: __("actions.label")
-          } if canChangeContact else none
+          }
         ],
         lastRowBorder: false,
         rows: contactPointRows

@@ -1,7 +1,7 @@
 import { fakerEN_GB as faker } from '@faker-js/faker'
 
 import { ContactPointType, RelationshipType } from '../enums.js'
-import { ContactPoint, Patient, User } from '../models.js'
+import { ContactPoint, Patient } from '../models.js'
 import { tokenize } from '../utils/object.js'
 import { formatOther, formatContact, stringToBoolean } from '../utils/string.js'
 
@@ -15,8 +15,6 @@ import { BaseModel } from './base.js'
  * @property {string} [relationshipOther] - Other relationship to child
  * @property {boolean} [hasParentalResponsibility] - Has parental responsibility
  * @property {boolean} [canNotify] - Notify about consent and vaccinations
- * @property {Date} [archivedAt] - Date archived
- * @property {string} [archivedBy_uid] - User who archived contact
  * @property {Array<ContactPointOptions>} [contactPoints] - Phone numbers and
  *   email addresses
  * @property {string} [tel] - Phone number (added as a contact point)
@@ -77,7 +75,6 @@ export class Contact extends BaseModel {
       ? stringToBoolean(options?.hasParentalResponsibility)
       : undefined
     this.canNotify = stringToBoolean(options?.canNotify)
-    this.archivedAt = options?.archivedAt && new Date(options.archivedAt)
     this.contactPoints = (options?.contactPoints || []).map(
       (contactPoint) => new ContactPoint(contactPoint, context)
     )
@@ -150,13 +147,12 @@ export class Contact extends BaseModel {
   /**
    * Has been archived
    *
-   * Archived contacts aren’t sent messages, and aren’t one of the child’s
-   * contacts, but can be restored
+   * A contact becomes archived if all contact points are archived
    *
    * @returns {boolean} Has been archived
    */
   get isArchived() {
-    return !!this.archivedAt
+    return this.activeContactPoints.length === 0
   }
 
   /**
@@ -548,10 +544,35 @@ export class Contact extends BaseModel {
   get uri() {
     return `/contacts/${this.uuid}`
   }
+
+  /**
+   * Archive
+   *
+   * @param {string} uuid - Contact UUID
+   * @param {object} options - Options
+   * @param {object} context - Context
+   * @returns {Contact} Contact
+   * @static
+   */
+  static archive(uuid, options, context) {
+    const contact = Contact.findOne(uuid, context)
+
+    for (const contactPoint of contact.activeContactPoints) {
+      contactPoint.archivedAt = options.archivedAt || new Date()
+      contactPoint.archivedBy_uid = options.archivedBy_uid
+    }
+
+    // Remove notice context
+    delete contact.context
+
+    // Update context
+    context.contacts[uuid] = contact
+
+    return contact
+  }
 }
 
 Contact.relate('patient_uuid', () => Patient, 'patient')
-Contact.relate('archivedBy_uid', () => User, 'archivedBy')
 
 /**
  * @import { NotifyEmailStatus, NotifySmsStatus } from '../enums.js'

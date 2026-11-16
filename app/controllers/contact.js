@@ -1,4 +1,3 @@
-import activity from '../datasets/activity.js'
 import { ContactPointSource, RelationshipType } from '../enums.js'
 import { Contact, Patient } from '../models.js'
 import { today } from '../utils/date.js'
@@ -163,46 +162,18 @@ export const contactController = {
   archive(request, response) {
     const { contact_uuid } = request.params
     const { data } = request.session
-    const { __, account, contact } = response.locals
+    const { __, account } = response.locals
 
-    Contact.update(
+    const contact = Contact.archive(
       contact_uuid,
-      { archivedAt: today(), archivedBy_uid: account?.uid },
+      {
+        archivedAt: today(),
+        archivedBy_uid: account?.uid
+      },
       data
     )
 
-    contact.patient?.addContactEvent(
-      activity.patient.contactArchived(contact),
-      account?.uid
-    )
-
     request.flash('success', __(`contact.archive.success`, { contact }))
-
-    return saveAndRedirect(
-      request,
-      response,
-      `/patients/${contact.patient_uuid}/contacts`
-    )
-  },
-
-  /**
-   * @type {RequestHandler<Record<string, string>>}
-   */
-  restore(request, response) {
-    const { contact_uuid } = request.params
-    const { data } = request.session
-    const { __, account, contact } = response.locals
-
-    // Contact model’s `update` merges values, so remove these directly
-    delete data.contacts[contact_uuid].archivedAt
-    delete data.contacts[contact_uuid].archivedBy_uid
-
-    contact.patient?.addContactEvent(
-      activity.patient.contactRestored(contact),
-      account?.uid
-    )
-
-    request.flash('success', __(`contact.restore.success`, { contact }))
 
     return saveAndRedirect(
       request,
