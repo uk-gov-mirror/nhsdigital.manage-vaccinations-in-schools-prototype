@@ -30,6 +30,12 @@
     view: "contacts"
   }) }}
 
+  {{ actionLink({
+    classes: "nhsuk-u-margin-0",
+    text: __("contact.new.label"),
+    href: "/contacts/new?patient_uuid=" + patient.uuid
+  }) if not account.isSchoolUser }}
+
   {# Note: this isn't guaranteed to work if the patient has multiple notices but should be fine for canned data #}
   {{ appStatus({
     text: patient.notice.name,
@@ -49,9 +55,4 @@
       }) }}
     </p>
   {% endif %}
-
-  {{ actionLink({
-    text: __("contact.new.label"),
-    href: "/contacts/new?patient_uuid=" + patient.uuid
-  }) if not account.isSchoolUser }}
 {% endblock %}
