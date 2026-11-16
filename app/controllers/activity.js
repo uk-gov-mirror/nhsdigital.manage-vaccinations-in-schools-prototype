@@ -288,7 +288,32 @@ export const activityController = {
               }
             ],
             createdBy_uid
-          })
+          }),
+          auditEvent({
+            name: activity.patient.contact(contact),
+            createdBy_uid
+          }),
+          auditEvent({
+            name: activity.patient.contactArchived(contact),
+            createdBy_uid
+          }),
+          auditEvent({
+            name: activity.patient.contactRestored(contact),
+            createdBy_uid
+          }),
+          ...[
+            activity.patient.contactPointAdded,
+            activity.patient.contactPointArchived,
+            activity.patient.contactPointRestored
+          ].map((contactPointActivity) =>
+            auditEvent({
+              name: contactPointActivity(
+                contact,
+                contact.firstActiveContactPoint(ContactPointType.Email)
+              ),
+              createdBy_uid
+            })
+          )
         ]
       },
       {
