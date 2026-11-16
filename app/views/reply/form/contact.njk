@@ -68,12 +68,14 @@
   }) }}
 
   {{ input({
-    label: __("contact.email.label"),
+    label: __("contact.email.label") + " (optional)",
     decorate: "reply.contact.email"
   }) if showContactDetails }}
 
   {{ input({
-    label: __("contact.tel.label") + " (optional)",
+    label: __("contact.tel.label"),
+    type: "tel",
+    width: "20",
     decorate: "reply.contact.tel"
   }) if showContactDetails }}
 

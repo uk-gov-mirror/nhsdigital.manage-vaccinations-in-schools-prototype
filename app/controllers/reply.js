@@ -1,7 +1,6 @@
 import wizard from '@x-govuk/govuk-prototype-wizard'
 
 import {
-  ContactPointType,
   GillickCompetent,
   RelationshipType,
   ReplyDecision,
@@ -20,7 +19,7 @@ import {
 import { today } from '../utils/date.js'
 import { saveAndRedirect } from '../utils/redirect.js'
 import { countAnswersNeedingTriage } from '../utils/reply.js'
-import { formatContact } from '../utils/string.js'
+import { formatContact, formatContactPoints } from '../utils/string.js'
 
 export const replyController = {
   /**
@@ -312,16 +311,11 @@ export const replyController = {
 
       response.locals.respondentItems = patientProgramme.patient.contacts.map(
         (contact) => {
-          const phoneNumbers = contact.formattedContactPointValues(
-            ContactPointType.Phone
-          )
-
           return {
             text: formatContact(contact, false),
-            hint:
-              phoneNumbers.length > 0
-                ? `Phone: ${phoneNumbers.join(', ')}`
-                : undefined,
+            hint: {
+              html: formatContactPoints(contact)
+            },
             value: contact.uuid
           }
         }
